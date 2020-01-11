@@ -35,8 +35,11 @@ class Problem:
     def getPatients(self):
         return self.patients
     
-    # def getRequests(self):
-    #     for pat in self.patients:
-    #         req = Request.Request(pat.start,pat.destination,pat.end,pat.rdvTime,pat.rdvDuration,pat.)
-
+    def getRequests(self):
+        for pat in self.patients:
+            req = Request.Request(pat.start,pat.destination,pat.end,pat.rdvTime,pat.rdvDuration,pat.category,pat.srvDuration)
+            self.requests.append(req)
+x = Problem('Models/easy/PTP-RAND-1_4_2_16.json')
+x.getRequests()
+print(x.requests[0].startPlace,x.requests[len(x.patients)-1])
 

@@ -3,8 +3,6 @@ class Request:
     startPlace = None
     # Place where the care is delivered for the patient of request
     destPlace = None
-    # Return place of the patient linked to request
-    returnPlace = None
     # Number of places taken by the patient of request
     placesVehicle = None
     # Time at which the health care service begins for request
@@ -15,11 +13,10 @@ class Request:
     category = None
     # Embark/Disembark time
     embark = None
-    def __init__(self,start,dest,ret,places,servicebegin,servicedur,category,embarkdisembark):
+    def __init__(self,start,dest,ret,servicebegin,servicedur,category,embarkdisembark):
         self.startPlace=start
         self.destPlace=dest
         self.returnPlace=ret
-        self.placesVehicle=places
         self.serviceBegin=servicebegin
         self.serviceDuration=servicedur
         self.category=category
