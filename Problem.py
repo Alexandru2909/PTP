@@ -6,6 +6,7 @@ class Problem:
     vehicles = list()
     patients = list()
     activities = list()
+    requests = list()
     def __init__(self, jsonFile):
         print("Json file is : " + jsonFile.split("/")[-1])
         with open(jsonFile) as json_file:
