@@ -37,6 +37,6 @@ class Problem:
     
     # def getRequests(self):
     #     for pat in self.patients:
-    #         req = Request.Request(pat.start,pat.destination,pat.end,pat.rdvTime,pat.rdvDuration,)
+    #         req = Request.Request(pat.start,pat.destination,pat.end,pat.rdvTime,pat.rdvDuration,pat.)
 
 
