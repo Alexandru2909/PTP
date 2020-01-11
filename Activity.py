@@ -14,7 +14,7 @@ class Activity:
             self.vehicle=v
     forward = Variable()
     backward = Variable()
-    def buildActivity(self,s1,e1,x1,v1,s2,e2,x2,v2):
-        self.forward.set(s1,e1,x1,v1)
-        self.backward.set(s2,e2,x2,v2)
+    def __init__(self,start1,end1,execute1,vehicle1,start2,end2,execute2,vehicle2):
+        self.forward.set(start1,end1,execute1,vehicle1)
+        self.backward.set(start2,end2,execute2,vehicle2)
             

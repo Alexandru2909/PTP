@@ -13,9 +13,10 @@ class Request:
     category = None
     # Embark/Disembark time
     embark = None
-    def __init__(self,start,dest,ret,servicebegin,servicedur,category,embarkdisembark):
+    def __init__(self,start,dest,ret,places,servicebegin,servicedur,category,embarkdisembark):
         self.startPlace=start
         self.destPlace=dest
+        self.placesVehicle=places
         self.returnPlace=ret
         self.serviceBegin=servicebegin
         self.serviceDuration=servicedur

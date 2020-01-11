@@ -37,9 +37,14 @@ class Problem:
     
     def getRequests(self):
         for pat in self.patients:
-            req = Request.Request(pat.start,pat.destination,pat.end,pat.rdvTime,pat.rdvDuration,pat.category,pat.srvDuration)
+            req = Request.Request(pat.start,pat.destination,pat.end,pat.load,pat.rdvTime,pat.rdvDuration,pat.category,pat.srvDuration)
             self.requests.append(req)
-x = Problem('Models/easy/PTP-RAND-1_4_2_16.json')
-x.getRequests()
-print(x.requests[0].startPlace,x.requests[len(x.patients)-1])
+    def getActivites(self):
+        for p in self.patients:
+            # possible bug
+            addedTime=''
+            for ind in range(len(p.rdvTime)):
+                addedTime += str(int(p.rdvTime[ind]) + int(p.rdvDuration[ind]))
+            act=Activity.Activity(p.start,p.rdvTime,0,0,addedTime,p.end,0,0)
+            self.activities.append(act)
 
