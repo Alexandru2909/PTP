@@ -1,27 +1,29 @@
 class Request:
     # Starting place of the patient linked to request
-    start = 0
+    startPlace = None
     # Place where the care is delivered for the patient of request
-    dest = 0
+    destPlace = None
     # Return place of the patient linked to request
-    ret = 0
+    returnPlace = None
     # Number of places taken by the patient of request
-    l = 0
+    placesVehicle = None
     # Time at which the health care service begins for request
-    u = 0
+    serviceBegin = None
     # Time needed to deliver the care for the patient of request
-    d = 0
+    serviceDuration = None
     # Maximum travel time of the patient linked to request
-    p = 0
+    travelTime = None
     # Category of patient of request(wheelchair, without, etc.)
-    c = 0
-    def set(self,s,d1,r,l,u,d2,p,c):
-        self.start=s
-        self.dest=d1
-        self.ret=r
-        self.l=l
-        self.u=u
-        self.d=d2
-        self.p=p
-        self.c=c
-        
+    category = None
+    # Embark/Disembark time
+    embark = None
+    def __init__(self,start,dest,ret,places,servicebegin,servicedur,traveltime,category,embarkdisembark):
+        self.startPlace=start
+        self.destPlace=dest
+        self.returnPlace=ret
+        self.placesVehicle=places
+        self.serviceBegin=servicebegin
+        self.serviceDuration=servicedur
+        self.travelTime=traveltime
+        self.category=category
+        self.embark=embarkdisembark

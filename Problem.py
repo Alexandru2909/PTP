@@ -1,5 +1,5 @@
 import json
-import Place, Vehicle, Patient
+import Place, Vehicle, Patient, Request, Activity
 
 class Problem:
     places = list()
@@ -37,4 +37,6 @@ class Problem:
     
     # def getRequests(self):
     #     for pat in self.patients:
+    #         req = Request.Request(pat.start,pat.destination,pat.end,pat.rdvTime,pat.rdvDuration,)
+
 
