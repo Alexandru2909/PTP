@@ -5,6 +5,7 @@ class Problem:
     places = list()
     vehicles = list()
     patients = list()
+    activities = list()
     def __init__(self, jsonFile):
         print("Json file is : " + jsonFile.split("/")[-1])
         with open(jsonFile) as json_file:
@@ -32,3 +33,7 @@ class Problem:
 
     def getPatients(self):
         return self.patients
+    
+    # def getRequests(self):
+    #     for pat in self.patients:
+
