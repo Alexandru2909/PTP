@@ -1,5 +1,6 @@
 import json
 import Place, Vehicle, Patient, Request, Activity
+import datetime
 
 class Problem:
     places = list()
@@ -7,13 +8,20 @@ class Problem:
     patients = list()
     activities = list()
     requests = list()
+    distMatrix = list()
+    maxWaitTime = list()
     def __init__(self, jsonFile):
         print("Json file is : " + jsonFile.split("/")[-1])
         with open(jsonFile) as json_file:
             data = json.load(json_file)
-            self.maxWaitTime = data['maxWaitTime']
+            H, M = data['maxWaitTime'].split("h")
+            self.maxWaitTime = datetime.timedelta(hours=int(H), minutes=int(M))
             self.sameVehicleBackWard = bool(data['sameVehicleBackward'])
             self.distMatrix = data['distMatrix']
+
+            for i in range(len(self.distMatrix)):
+                for j in range(i):
+                    self.distMatrix[i][j] = datetime.timedelta(minutes=self.distMatrix[i][j])
 
             for place in data['places']:
                 self.places.append(Place.Place(place['id'], place['lat'], place['long'], place['category']))
@@ -47,4 +55,15 @@ class Problem:
                 addedTime += str(int(p.rdvTime[ind]) + int(p.rdvDuration[ind]))
             act=Activity.Activity(p.start,p.rdvTime,0,0,addedTime,p.end,0,0)
             self.activities.append(act)
+        
+    
+    def check_request(self, request, vehicle):
+        if request.category not in vehicle.canTake:
+            return False
+        elif vehicle.capacity < request.load:
+            return False
+        for time in vehicle.getTimeWindows():
+            
+            
+        
 

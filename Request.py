@@ -1,3 +1,5 @@
+import datetime
+
 class Request:
     # Starting place of the patient linked to request
     startPlace = None
@@ -22,3 +24,15 @@ class Request:
         self.serviceDuration=servicedur
         self.category=category
         self.embark=embarkdisembark
+
+    def getReqTime(self):
+        # return datetime.datetime.strptime(serviceBegin, '%Hh%M').time()
+        return datetime.timedelta(hours=int(self.serviceBegin.split("h")[0], minutes=int(self.serviceBegin.split("h")[1])))
+
+    def getReqDur(self):
+        # return datetime.datetime.strptime(self.serviceDuration, '%Hh%M').time()
+        return datetime.timedelta(hours=int(self.serviceDuration.split("h")[0], minutes=int(self.serviceDuration.split("h")[1])))
+
+    def getEmbarkDisembark(self):
+        # return datetime.datetime.strptime(self.embark, '%Hh%M').time()
+        return datetime.timedelta(hours=int(self.embark.split("h")[0], minutes=int(self.embark.split("h")[1])))

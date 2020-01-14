@@ -1,3 +1,5 @@
+import datetime 
+
 class Vehicle:
     def __init__(self, id1, canTake, start, end, capacity, availability):
         """
@@ -14,3 +16,16 @@ class Vehicle:
         self.end = end
         self.capacity = capacity
         self.availability = availability
+
+    def getTimeWindows(self):
+        windows = []
+        for it in self.availability:
+            start, end = it.split(":")
+            startH, startM = start.split("h")
+            endH, endM = end.split("h")
+            # st = datetime.datetime.strptime(start, '%Hh%M').time()
+            # en = datetime.datetime.strptime(end, '%Hh%M').time()
+            st = datetime.timedelta(hours=int(startH), minutes=int(startM))
+            en = datetime.timedelta(hours=int(endH), minutes=int(endM))
+            windows.append((st, en))
+        return windows
