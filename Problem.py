@@ -58,12 +58,14 @@ class Problem:
         
     
     def check_request(self, request, vehicle):
-        if request.category not in vehicle.canTake:
+        if request.selected == 0:
+            if request.category not in vehicle.canTake:
+                return False
+            elif vehicle.capacity < request.load:
+                return False
+            for time in vehicle.getTimeWindows():
+        else:
             return False
-        elif vehicle.capacity < request.load:
-            return False
-        for time in vehicle.getTimeWindows():
-            
             
         
 

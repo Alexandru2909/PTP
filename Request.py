@@ -15,6 +15,8 @@ class Request:
     category = None
     # Embark/Disembark time
     embark = None
+    #If the request was selected (1) or not (0)
+    selected = 0
     def __init__(self,start,dest,ret,places,servicebegin,servicedur,category,embarkdisembark):
         self.startPlace=start
         self.destPlace=dest
