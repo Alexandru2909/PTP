@@ -1,15 +1,32 @@
 import json
 import Place, Vehicle, Patient, Request
 import datetime
+import copy
+
+def convertTime(x):
+    h,m=x.split('h')
+    return datetime.timedelta(hours=int(h), minutes=int(m))
+
 
 class Problem:
     places = list()
     vehicles = list()
     patients = list()
-    activities = list()
     requests = list()
     distMatrix = list()
     maxWaitTime = list()
+
+    class Instance:
+        vehicles = None
+        requests = None
+        def __init__(self,problem):
+            self.vehicles = copy.deepcopy(problem.vehicles)
+            self.requests = copy.deepcopy(problem.requests)
+        def copy(self,cop):
+            self.vehicles = copy.deepcopy(cop.vehicles)
+            self.requests = copy.deepcopy(cop.requests)
+
+
     def __init__(self, jsonFile):
         print("Json file is : " + jsonFile.split("/")[-1])
         with open(jsonFile) as json_file:
@@ -29,6 +46,7 @@ class Problem:
             for vehicle in data['vehicles']:
                 self.vehicles.append(Vehicle.Vehicle(vehicle["id"], vehicle["canTake"], vehicle["start"], vehicle["end"],
                                                 vehicle["capacity"], vehicle["availability"]))
+                # print( vehicle["availability"],self.vehicles[-1].availability[0])
 
             for patient in data['patients']:
                 self.patients.append(Patient.Patient(patient["id"], patient["category"],patient["load"],  patient["start"],
@@ -47,25 +65,22 @@ class Problem:
         for pat in self.patients:
             req = Request.Request(pat.start,pat.destination,pat.end,pat.load,pat.rdvTime,pat.rdvDuration,pat.category,pat.srvDuration)
             self.requests.append(req)
-    def getActivites(self):
-        for p in self.patients:
-            # possible bug
-            addedTime=''
-            for ind in range(len(p.rdvTime)):
-                addedTime += str(int(p.rdvTime[ind]) + int(p.rdvDuration[ind]))
-            act=Activity.Activity(p.start,p.rdvTime,0,0,addedTime,p.end,0,0)
-            self.activities.append(act)
-        
     
-    def check_request(self, request, vehicle):
-        if request.selected == 0:
-            if request.category not in vehicle.canTake:
-                return False
-            elif vehicle.capacity < request.load:
-                return False
-            for time in vehicle.getTimeWindows():
-        else:
-            return False
+    def checkReq(self,inst,reqIndex,vehicle1,vehicle2):
+        total_time_v1 = self.distMatrix[vehicle1.][inst.requests[reqIndex].startPlace]
+        total_time_v1 += inst.requests[reqIndex].embark
+        total_time_v1 += self.distMatrix[inst.requests[reqIndex].start][inst.requests[reqIndex].destPlace]
+        total_time_v1 += inst.requests[reqIndex].embark
+        # window
+        # for win in vehicle1.getTimeWindows():
+
+
+
+
+
+# x = Problem('Models/hard/PTP-RAND-3_112_6_112.json')
+    
+    
             
         
 
