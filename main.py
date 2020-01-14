@@ -6,9 +6,9 @@ if __name__ == "__main__":
 
     problem = Problem.Problem(models_path + random.choice(os.listdir(models_path)))
 
-    problem.getRequests()
-    for i in problem.orderReq():
-        print(i.getReqTime())
+    # problem.getRequests()
+    # for i in problem.orderReq():
+    #     print(i.getReqTime())
 
-
-    # print(problem.vehicles[0].history)
+    for i in range(len(problem.vehicles)):
+        print(problem.vehicles[i].id, problem.vehicles[i].availability)
