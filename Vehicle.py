@@ -16,6 +16,10 @@ class Vehicle:
         self.end = end
         self.capacity = capacity
         self.availability = availability
+        self.history = []
+
+    def __eq__(self,other):
+        return self.id == other.id and self.canTake == other.canTake and self.start == other.start and self.end == other.end and self.capacity == other.capacity and self.availability == other.availability
 
     def getTimeWindows(self):
         windows = []
@@ -23,8 +27,6 @@ class Vehicle:
             start, end = it.split(":")
             startH, startM = start.split("h")
             endH, endM = end.split("h")
-            # st = datetime.datetime.strptime(start, '%Hh%M').time()
-            # en = datetime.datetime.strptime(end, '%Hh%M').time()
             st = datetime.timedelta(hours=int(startH), minutes=int(startM))
             en = datetime.timedelta(hours=int(endH), minutes=int(endM))
             windows.append((st, en))
