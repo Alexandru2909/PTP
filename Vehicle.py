@@ -17,6 +17,9 @@ class Vehicle:
         self.capacity = capacity
         self.availability = availability
 
+    def __eq__(self,other):
+        return self.id == other.id and self.canTake == other.canTake and self.start == other.start and self.end == other.end and self.capacity == other.capacity and self.availability == other.availability
+
     def getTimeWindows(self):
         windows = []
         for it in self.availability:
