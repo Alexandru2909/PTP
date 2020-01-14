@@ -56,6 +56,12 @@ class Problem:
             act=Activity.Activity(p.start,p.rdvTime,0,0,addedTime,p.end,0,0)
             self.activities.append(act)
         
+    def getBestRequest(requests):
+        def minSlack(requests):
+            ret_list = list()
+            for request in requests:
+                
+
     
     def check_request(self, request, vehicle):
         if request.selected == 0:

@@ -1,5 +1,6 @@
 class Activity:
     class Variable:
+        
         start=0.0
         end=0.1
         duration = 0.1
