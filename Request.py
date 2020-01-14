@@ -41,17 +41,17 @@ class Request:
         self.embark=embarkdisembark
 
     def getReqTime(self):
-        # return datetime.datetime.strptime(serviceBegin, '%Hh%M').time()
-        return datetime.timedelta(hours=int(self.serviceBegin.split("h")[0], minutes=int(self.serviceBegin.split("h")[1])))
+        H, M = self.serviceBegin.split("h")
+        return datetime.timedelta(hours=int(H), minutes=int(M))
 
     def getReqDur(self):
-        # return datetime.datetime.strptime(self.serviceDuration, '%Hh%M').time()
-        return datetime.timedelta(hours=int(self.serviceDuration.split("h")[0], minutes=int(self.serviceDuration.split("h")[1])))
+        H, M = self.serviceDuration.split("h")
+        return datetime.timedelta(hours=int(H), minutes=int(M))
 
     def getEmbarkDisembark(self):
-        # return datetime.datetime.strptime(self.embark, '%Hh%M').time()
-        return datetime.timedelta(hours=int(self.embark.split("h")[0], minutes=int(self.embark.split("h")[1])))
+        H, M = self.embark.split("h")
+        return datetime.timedelta(hours=int(H), minutes=int(M))
 
     def setActivity(self,start1,end1,execute1,vehicle1,start2,end2,execute2,vehicle2):
-        self.forward.set(datetime.timedelta(hours=int(start1.split("h")[0], minutes=int(start1.split("h")[1]))),datetime.timedelta(hours=int(end1.split("h")[0], minutes=int(end1.split("h")[1]))),execute1,vehicle1)
-        self.forward.set(datetime.timedelta(hours=int(start2.split("h")[0], minutes=int(start2.split("h")[1]))),datetime.timedelta(hours=int(end2.split("h")[0], minutes=int(end2.split("h")[1]))),execute2,vehicle2)
+        self.forward.set(datetime.timedelta(hours=int(start1.split("h")[0]), minutes=int(start1.split("h")[1])),datetime.timedelta(hours=int(end1.split("h")[0]), minutes=int(end1.split("h")[1])),execute1,vehicle1)
+        self.forward.set(datetime.timedelta(hours=int(start2.split("h")[0]), minutes=int(start2.split("h")[1])),datetime.timedelta(hours=int(end2.split("h")[0]), minutes=int(end2.split("h")[1])),execute2,vehicle2)

@@ -37,7 +37,7 @@ class Problem:
             self.distMatrix = data['distMatrix']
 
             for i in range(len(self.distMatrix)):
-                for j in range(i):
+                for j in range(len(self.distMatrix[i])):
                     self.distMatrix[i][j] = datetime.timedelta(minutes=self.distMatrix[i][j])
 
             for place in data['places']:
@@ -51,6 +51,10 @@ class Problem:
             for patient in data['patients']:
                 self.patients.append(Patient.Patient(patient["id"], patient["category"],patient["load"],  patient["start"],
                                                 patient["destination"], patient["end"], patient["rdvTime"], patient["rdvDuration"], patient["srvDuration"]))
+            for vh in self.vehicles:
+                for i in range(len(vh.getTimeWindows())):
+                    vh.history.append((vh.start, vh.getTimeWindows()[i][0]))
+  
 
     def getPlaces(self):
         return self.places
@@ -65,12 +69,21 @@ class Problem:
         for pat in self.patients:
             req = Request.Request(pat.start,pat.destination,pat.end,pat.load,pat.rdvTime,pat.rdvDuration,pat.category,pat.srvDuration)
             self.requests.append(req)
+
+    def orderReq(self):
+        for i in range(len(self.requests)):
+            for j in range(len(self.requests)):
+                if self.requests[i].getReqTime() < self.requests[j].getReqTime():
+                    a = self.requests[i]
+                    self.requests[i] = self.requests[j]
+                    self.requests[j] = a
+        return self.requests
     
-    def checkReq(self,inst,reqIndex,vehicle1,vehicle2):
-        total_time_v1 = self.distMatrix[vehicle1.][inst.requests[reqIndex].startPlace]
-        total_time_v1 += inst.requests[reqIndex].embark
-        total_time_v1 += self.distMatrix[inst.requests[reqIndex].start][inst.requests[reqIndex].destPlace]
-        total_time_v1 += inst.requests[reqIndex].embark
+    # def checkReq(self,inst,reqIndex,vehic1le1,vehicle2):
+    #     total_time_v1 = self.distMatrix[vehicle1.][inst.requests[reqIndex].startPlace]
+    #     total_time_v1 += inst.requests[reqIndex].embark
+    #     total_time_v1 += self.distMatrix[inst.requests[reqIndex].start][inst.requests[reqIndex].destPlace]
+    #     total_time_v1 += inst.requests[reqIndex].embark
         # window
         # for win in vehicle1.getTimeWindows():
 
