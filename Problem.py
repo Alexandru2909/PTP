@@ -1,5 +1,5 @@
 import json
-import Place, Vehicle, Patient, Request, Activity
+import Place, Vehicle, Patient, Request
 import datetime
 
 class Problem:
