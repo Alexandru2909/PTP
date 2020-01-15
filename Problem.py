@@ -60,15 +60,12 @@ class Problem:
             req = Request.Request(pat.start,pat.destination,pat.end,pat.load,pat.rdvTime,pat.rdvDuration,pat.category,pat.srvDuration)
             self.requests.append(req)
         
-    def getBestRequest(self, requests):
-        def minSlack(requests):
-            ret_list = list()
-            for request in requests:
-                ret_list.append((self.distMatrix[request.startPlace][request.destPlace] + self.distMatrix[request.destPlace][request.returnPlace] + 4*request.embark)*request.placesVehicle)
-            return ret_list
+    def getBestRequest(self, request, depth):
+        def minSlack(request):
+                return (self.distMatrix[request.startPlace][request.destPlace] + self.distMatrix[request.destPlace][request.returnPlace] + 4*request.embark)*request.placesVehicle
 
-        minSlackList = minSlack(requests)
-        return max(minSlackList)
+        minSlack = minSlack(request)
+        return minSlack.seconds/60 
     
     def getBestVehicle(self, request):
         max_weight = 0
