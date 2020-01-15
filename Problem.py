@@ -1,5 +1,5 @@
 import json
-import Place, Vehicle, Patient, Request, Instance
+import Place, Vehicle, Patient, Request, Instance, Activity
 import datetime
 
 def convertTime(x):
@@ -124,6 +124,37 @@ class Problem:
             # else
             #   return m2
 
+    def insertForward(self, inst, reqID, vehID):
+        startPlace = inst.vehicle[vehID].history[-1][0]
+        startTime = inst.request[reqID].serviceBegin - (self.distMatrix[startPlace][inst.requests[reqID].startPlace] + self.distMatrix[inst.request[reqID].embark]*2 + self.distMatrix[inst.request[reqID].startPlace][inst.request[reqID].destPlace])
+        midPlace = inst.request[reqID].startPlace
+        midTime = inst.request[reqID].serviceBegin - (self.distMatrix[inst.request[reqID].embark]*2 + self.distMatrix[inst.request[reqID].startPlace][inst.request[reqID].destPlace])
+        endPlace = inst.request[reqID].destPlace
+        endTime = inst.request[reqID].serviceBegin
+        timeleft = inst.request[reqID].serviceBegin - endTime
+        requestIndex = reqID
+        load = inst.request[reqID].placesVehicle
+        
+        act = Activity.Activity(startPlace, startTime, midPlace, midTime, endPlace, endTime, timeleft, requestIndex, load)
+        inst.vehicle[vehID].setActivity(act)
+        
+        return inst
+
+    def insertBackward(self, inst, reqID, vehID):
+        startPlace = inst.vehicle[vehID].history[-1][0]
+        startTime = (inst.request[reqID].serviceBegin + inst.request[reqID].serviceDuration) - self.distMatrix[inst.vehicle[vehID].history[-1][0]][inst.request[reqID].destPlace]
+        midPlace = inst.request[reqID].destPlace
+        midTime = inst.request[reqID].serviceBegin + inst.request[reqID].serviceDuration + inst.request[reqID].embark*2
+        endPlace = inst.request[reqID].returnPlace
+        endTime = inst.request[reqID].serviceDuration + self.distMatrix[inst.request[reqID].destPlace][inst.request[reqID].startPlace]
+        timeleft = midTime - endTime
+        requestIndex = reqID
+        load = inst.request[reqID].placesVehicle
+        
+        
+        act = Activity.Activity(startPlace, startTime, midPlace, midTime, endPlace, endTime, timeleft, requestIndex, load)
+        inst.vehicle[vehID].setActivity(act)
+        return inst
 
     def search(self,depth):
         self.orderReq()
