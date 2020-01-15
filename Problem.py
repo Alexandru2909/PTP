@@ -44,16 +44,18 @@ class Problem:
                 self.places.append(Place.Place(place['id'], place['lat'], place['long'], place['category']))
 
             for vehicle in data['vehicles']:
-                self.vehicles.append(Vehicle.Vehicle(vehicle["id"], vehicle["canTake"], vehicle["start"], vehicle["end"],
-                                                vehicle["capacity"], vehicle["availability"]))
+                if len(vehicle["availability"]) > 1:
+                    for i in range(len(vehicle["availability"])):
+                        self.vehicles.append(Vehicle.Vehicle(vehicle["id"], vehicle["canTake"], vehicle["start"], vehicle["end"],
+                                                        vehicle["capacity"], vehicle["availability"][i]))
                 # print( vehicle["availability"],self.vehicles[-1].availability[0])
 
             for patient in data['patients']:
                 self.patients.append(Patient.Patient(patient["id"], patient["category"],patient["load"],  patient["start"],
                                                 patient["destination"], patient["end"], patient["rdvTime"], patient["rdvDuration"], patient["srvDuration"]))
             for vh in self.vehicles:
-                for i in range(len(vh.getTimeWindows())):
-                    vh.history.append((vh.start, vh.getTimeWindows()[i][0]))
+                # for i in range(len(vh.getTimeWindow())):
+                vh.history.append((vh.start, vh.getTimeWindow()[0]))
   
 
     def getPlaces(self):
