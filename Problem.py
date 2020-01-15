@@ -70,11 +70,31 @@ class Problem:
             req = Request.Request(pat.start,pat.destination,pat.end,pat.load,pat.rdvTime,pat.rdvDuration,pat.category,pat.srvDuration)
             self.requests.append(req)
         
-    def getBestRequest(requests):
+    def getBestRequest(self, requests):
         def minSlack(requests):
             ret_list = list()
             for request in requests:
-                pass
+                ret_list.append((self.distMatrix[request.startPlace][request.destPlace] + self.distMatrix[request.destPlace][request.returnPlace] + 4*request.embark)*request.placesVehicle)
+            return ret_list
+
+        minSlackList = minSlack(requests)
+        return max(minSlackList)
+    
+    def getBestVehicle(self, request):
+        max_weight = 0
+        weight = 0
+        timeToDeliver = 0
+        best_vehicle = None
+        for vehicle in self.vehicles:
+            if request.category in vehicle.canTake:
+                timeToArriveToPatient = self.distMatrix[vehicle.history[-1][0]][request.startPlace]
+                timeOfArrivalToPatient = vehicle.history[-1][1] + timeToArriveToPatient
+                if vehicle.capacity >= request.placesVehicle:
+                    if vehicle.max_capacity > vehicle.capacity:
+                        cantDeliver = False
+                        for patient in vehicle.patients_list:
+                            # if 
+                        weight += 10 * (vehicle.max_capacity - vehicle.capacity)
 
     def orderReq(self):
         for i in range(len(self.requests)):
