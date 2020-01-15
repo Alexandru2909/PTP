@@ -1,7 +1,6 @@
 import json
-import Place, Vehicle, Patient, Request
+import Place, Vehicle, Patient, Request, Instance
 import datetime
-import copy
 
 def convertTime(x):
     h,m=x.split('h')
@@ -15,17 +14,6 @@ class Problem:
     requests = list()
     distMatrix = list()
     maxWaitTime = list()
-
-    class Instance:
-        vehicles = None
-        requests = None
-        def __init__(self,problem):
-            self.vehicles = copy.deepcopy(problem.vehicles)
-            self.requests = copy.deepcopy(problem.requests)
-        def copy(self,cop):
-            self.vehicles = copy.deepcopy(cop.vehicles)
-            self.requests = copy.deepcopy(cop.requests)
-
 
     def __init__(self, jsonFile):
         print("Json file is : " + jsonFile.split("/")[-1])
@@ -95,7 +83,7 @@ class Problem:
                     if vehicle.max_capacity > vehicle.capacity:
                         cantDeliver = False
                         for patient in vehicle.patients_list:
-                            # if 
+                            pass
                         weight += 10 * (vehicle.max_capacity - vehicle.capacity)
 
     def orderReq(self):
@@ -107,34 +95,75 @@ class Problem:
                     self.requests[j] = a
         return self.requests
     
+    def setActivityForward(self,inst,vehInd,reqInd):
+        if inst.requsts[reqInd].category not in inst.vehicles[vehInd].canTake:
+            return False
+        vehAct = inst.vehicles[vehInd].getLastActivity()
+        if inst.requests[reqInd].placesVehicle > inst.vehicles[vehInd].capacity - vehAct.load:
+            return False
+        total_time = self.distMatrix[vehAct.endPlace][inst.requests[reqInd].startPlace]
+        total_time += inst.requests[reqInd].embark*2
+        total_time += self.distMatrix[inst.requests[reqInd].startPlace][inst.requests[reqInd].endPlace]
+        if vehAct.endTime+total_time > inst[vehInd].getTimeWindow()[1]:
+            return False
+        if inst.requests[reqInd].serviceBegin-total_time<inst.vehicles[vehInd].getTimeWindow()[0]:
+            return False
+
+    def subsearch(self,inst,initDepth,layersLeft):
+        minH = 1000
+        if layersLeft==0:
+            pass
+            # compare heuristic(inst,initDepth,slected=0) and heuristic(inst,initDepth,slected=1) and return min
+            # insert here heuristic returning int
+        else:
+            pass
+            # m1 = heuristic(inst,initDepth,slected=0)
+            # m2 = heuristic(inst,initDepth,slected=1)
+            # if m1<m2
+            #   return m1
+            # else
+            #   return m2
+
+
+    def search(self,depth):
+        self.orderReq()
+        initInst = Instance.Instance(self)
+        # to be completed using subsearch
+
+
+
+        
+
+
+
 
     # Nush ce sa fac cu astea o disparut activities Plox.
-    def check_vehicles(requests,activities):
-        for i in range(len(requests)):
-            for j in range(len(requests)):
-                if i != j:
-                    if (activities[i].forward.vehicle == activities[i].backward.vehicle == activities[j].forward.vehicle == activities[j].backward.vehicle):
-                        if (activities[j].forward.start - activities[i].forward.start < activities[j].forward.start - activities[i].forward.start or activities[i].forward.start - activities[j].forward.start < activities[i].forward.start - activities[j].forward.start):
-                            return False
-                        if (activities[j].forward.start - activities[i].backward.end < activities[j].forward.end - activities[i].forward.start or activities[i].forward.start - activities[j].backward.end < activities[i].forward.end - activities[j].forward.start):
-                            return False
-                        if (activities[j].backward.end - activities[i].forward.start < activities[j].forward.start - activities[i].forward.end or activities[j].backward.end - activities[i].forward.start < activities[i].forward.start - activities[j].forward.end):
-                            return False
-                        if (activities[j].backward.end - activities[i].backward.end < activities[j].forward.end - activities[i].forward.end or activities[j].backward.end - activities[i].backward.end < activities[i].forward.end - activities[j].forward.end):
-                            return False
-        return True
+    # def check_vehicles(requests,activities):
+    #     for i in range(len(requests)):
+    #         for j in range(len(requests)):
+    #             if i != j:
+    #                 if (activities[i].forward.vehicle == activities[i].backward.vehicle == activities[j].forward.vehicle == activities[j].backward.vehicle):
+    #                     if (activities[j].forward.start - activities[i].forward.start < activities[j].forward.start - activities[i].forward.start or activities[i].forward.start - activities[j].forward.start < activities[i].forward.start - activities[j].forward.start):
+    #                         return False
+    #                     if (activities[j].forward.start - activities[i].backward.end < activities[j].forward.end - activities[i].forward.start or activities[i].forward.start - activities[j].backward.end < activities[i].forward.end - activities[j].forward.start):
+    #                         return False
+    #                     if (activities[j].backward.end - activities[i].forward.start < activities[j].forward.start - activities[i].forward.end or activities[j].backward.end - activities[i].forward.start < activities[i].forward.start - activities[j].forward.end):
+    #                         return False
+    #                     if (activities[j].backward.end - activities[i].backward.end < activities[j].forward.end - activities[i].forward.end or activities[j].backward.end - activities[i].backward.end < activities[i].forward.end - activities[j].forward.end):
+    #                         return False
+    #     return True
     
-    def check_request(self, request, activity):
-        if request.selected == 1:
-            if activity.forward.execute != 1 and activity.backward.execute != 1:
-                return False
-        if (activity.forward.end > request.getReqTime()):
-            return False
-        if (activity.backward.start < request.getReqTime() + request.getReqDur()):
-            return False
-        if (request.category not in activity.forward.vehicle.canTake) or (request.category not in activity.backward.vehicle.canTake):
-            return False
-        return True
+    # def check_request(self, request, activity):
+    #     if request.selected == 1:
+    #         if activity.forward.execute != 1 and activity.backward.execute != 1:
+    #             return False
+    #     if (activity.forward.end > request.getReqTime()):
+    #         return False
+    #     if (activity.backward.start < request.getReqTime() + request.getReqDur()):
+    #         return False
+    #     if (request.category not in activity.forward.vehicle.canTake) or (request.category not in activity.backward.vehicle.canTake):
+    #         return False
+        # return True
 
     # def checkReq(self,inst,reqIndex,vehicle1,vehicle2):
     #     total_time_v1 = self.distMatrix[vehicle1.][inst.requests[reqIndex].startPlace]
@@ -143,14 +172,3 @@ class Problem:
     #     total_time_v1 += inst.requests[reqIndex].embark
         # window
         # for win in vehicle1.getTimeWindows():
-
-
-
-
-
-# x = Problem('Models/hard/PTP-RAND-3_112_6_112.json')
-    
-    
-            
-        
-

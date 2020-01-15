@@ -21,9 +21,15 @@ class Vehicle:
         self.availability = availability
         self.history = list()
 
-        # if len(self.availability) > 1:
+    def getLastActivity(self):
+        return self.history[-1]
 
-
+    def setActivity(self,act):
+        self.history.append(act)
+        self.history.sort(key=lambda x:x.startTime)
+    
+    def deleteActivity(self,act):
+        self.history.remove(act)
 
     def __eq__(self,other):
         return self.id == other.id and self.canTake == other.canTake and self.start == other.start and self.end == other.end and self.capacity == other.capacity and self.availability == other.availability
