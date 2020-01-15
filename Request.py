@@ -27,16 +27,18 @@ class Request:
         self.serviceDuration=servicedur
         self.category=category
         self.embark=embarkdisembark
-
+        self.getReqTime()
+        self.getReqDur()
+        self.getEmbark()
 
     def getReqTime(self):
         H, M = self.serviceBegin.split("h")
-        return datetime.timedelta(hours=int(H), minutes=int(M))
+        self.serviceBegin = datetime.timedelta(hours=int(H), minutes=int(M))
 
     def getReqDur(self):
         H, M = self.serviceDuration.split("h")
-        return datetime.timedelta(hours=int(H), minutes=int(M))
+        self.serviceDuration = datetime.timedelta(hours=int(H), minutes=int(M))
 
     def getEmbark(self):
         H, M = self.embark.split("h")
-        return datetime.timedelta(hours=int(H), minutes=int(M))
+        self.embark = datetime.timedelta(hours=int(H), minutes=int(M))

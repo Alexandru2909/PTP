@@ -60,12 +60,12 @@ class Problem:
             req = Request.Request(pat.id,pat.start,pat.destination,pat.end,pat.load,pat.rdvTime,pat.rdvDuration,pat.category,pat.srvDuration)
             self.requests.append(req)
         
-    def getBestRequest(self, request, depth):
+    def getBestRequest(self, request, no_solutions):
         def minSlack(request):
                 return (self.distMatrix[request.startPlace][request.destPlace] + self.distMatrix[request.destPlace][request.returnPlace] + 4*request.embark)*request.placesVehicle
 
         minSlack = minSlack(request)
-        return minSlack.seconds/60 
+        return minSlack.seconds/60 + no_solutions*10
     
     def getBestVehicle(self, request):
         max_weight = 0
@@ -102,7 +102,7 @@ class Problem:
     def orderReq(self):
         for i in range(len(self.requests)):
             for j in range(len(self.requests)):
-                if self.requests[i].getReqTime() < self.requests[j].getReqTime():
+                if self.requests[i].serviceBegin < self.requests[j].serviceBegin:
                     a = self.requests[i]
                     self.requests[i] = self.requests[j]
                     self.requests[j] = a
@@ -169,6 +169,7 @@ class Problem:
         timeleft = inst.request[reqID].serviceBegin - endTime
         requestIndex = reqID
         load = inst.request[reqID].placesVehicle
+        timeSurplus = self.maxWaitTime - (inst.requests[reqID].serviceBegin - startTime)
         
         act = Activity.Activity(startPlace, startTime, midPlace, midTime, endPlace, endTime, timeleft, requestIndex, load)
         inst.vehicle[vehID].setActivity(act)
@@ -196,5 +197,5 @@ x = Problem('Models/easy/PTP-RAND-1_8_4_32.json')
 x.getRequests()
 y = Instance.Instance(x)
 # for i in x.requests:
-    # print(i.startPlace,i.destPlace,i.placesVehicle,'id=',i.idReq,i.getEmbark())
+    # print(i.startPlace,i.destPlace,i.placesVehicle,'id=',i.idReq,i.embark)
 print(x.getBestVeh(y,0))
