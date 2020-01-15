@@ -17,7 +17,8 @@ class Request:
     embark = None
     #If the request was selected (1) or not (0)
     selected = 0
-    def __init__(self,start,dest,ret,places,servicebegin,servicedur,category,embarkdisembark):
+    def __init__(self,idReq,start,dest,ret,places,servicebegin,servicedur,category,embarkdisembark):
+        self.idReq = idReq
         self.startPlace=start
         self.destPlace=dest
         self.placesVehicle=places
@@ -27,6 +28,7 @@ class Request:
         self.category=category
         self.embark=embarkdisembark
 
+
     def getReqTime(self):
         H, M = self.serviceBegin.split("h")
         return datetime.timedelta(hours=int(H), minutes=int(M))
@@ -35,6 +37,6 @@ class Request:
         H, M = self.serviceDuration.split("h")
         return datetime.timedelta(hours=int(H), minutes=int(M))
 
-    def getEmbarkDisembark(self):
+    def getEmbark(self):
         H, M = self.embark.split("h")
         return datetime.timedelta(hours=int(H), minutes=int(M))

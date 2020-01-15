@@ -57,7 +57,7 @@ class Problem:
     
     def getRequests(self):
         for pat in self.patients:
-            req = Request.Request(pat.start,pat.destination,pat.end,pat.load,pat.rdvTime,pat.rdvDuration,pat.category,pat.srvDuration)
+            req = Request.Request(pat.id,pat.start,pat.destination,pat.end,pat.load,pat.rdvTime,pat.rdvDuration,pat.category,pat.srvDuration)
             self.requests.append(req)
         
     def getBestRequest(self, requests):
@@ -195,45 +195,9 @@ class Problem:
         return inst
 
 
-
-
-        
-
-
-
-
-    # Nush ce sa fac cu astea o disparut activities Plox.
-    # def check_vehicles(requests,activities):
-    #     for i in range(len(requests)):
-    #         for j in range(len(requests)):
-    #             if i != j:
-    #                 if (activities[i].forward.vehicle == activities[i].backward.vehicle == activities[j].forward.vehicle == activities[j].backward.vehicle):
-    #                     if (activities[j].forward.start - activities[i].forward.start < activities[j].forward.start - activities[i].forward.start or activities[i].forward.start - activities[j].forward.start < activities[i].forward.start - activities[j].forward.start):
-    #                         return False
-    #                     if (activities[j].forward.start - activities[i].backward.end < activities[j].forward.end - activities[i].forward.start or activities[i].forward.start - activities[j].backward.end < activities[i].forward.end - activities[j].forward.start):
-    #                         return False
-    #                     if (activities[j].backward.end - activities[i].forward.start < activities[j].forward.start - activities[i].forward.end or activities[j].backward.end - activities[i].forward.start < activities[i].forward.start - activities[j].forward.end):
-    #                         return False
-    #                     if (activities[j].backward.end - activities[i].backward.end < activities[j].forward.end - activities[i].forward.end or activities[j].backward.end - activities[i].backward.end < activities[i].forward.end - activities[j].forward.end):
-    #                         return False
-    #     return True
-    
-    # def check_request(self, request, activity):
-    #     if request.selected == 1:
-    #         if activity.forward.execute != 1 and activity.backward.execute != 1:
-    #             return False
-    #     if (activity.forward.end > request.getReqTime()):
-    #         return False
-    #     if (activity.backward.start < request.getReqTime() + request.getReqDur()):
-    #         return False
-    #     if (request.category not in activity.forward.vehicle.canTake) or (request.category not in activity.backward.vehicle.canTake):
-    #         return False
-        # return True
-
-    # def checkReq(self,inst,reqIndex,vehicle1,vehicle2):
-    #     total_time_v1 = self.distMatrix[vehicle1.][inst.requests[reqIndex].startPlace]
-    #     total_time_v1 += inst.requests[reqIndex].embark
-    #     total_time_v1 += self.distMatrix[inst.requests[reqIndex].start][inst.requests[reqIndex].destPlace]
-    #     total_time_v1 += inst.requests[reqIndex].embark
-        # window
-        # for win in vehicle1.getTimeWindows():
+x = Problem('Models/easy/PTP-RAND-1_8_4_32.json')
+x.getRequests()
+y = Instance.Instance(x)
+# for i in x.requests:
+    # print(i.startPlace,i.destPlace,i.placesVehicle,'id=',i.idReq,i.getEmbark())
+print(x.getBestVeh(y,0))
