@@ -41,9 +41,9 @@ class Problem:
             for patient in data['patients']:
                 self.patients.append(Patient.Patient(patient["id"], patient["category"],patient["load"],  patient["start"],
                                                 patient["destination"], patient["end"], patient["rdvTime"], patient["rdvDuration"], patient["srvDuration"]))
-            for vh in self.vehicles:
-                # for i in range(len(vh.getTimeWindow())):
-                vh.history.append((vh.start, vh.getTimeWindow()[0]))
+            # for vh in self.vehicles:
+            #     # for i in range(len(vh.getTimeWindow())):
+            #     vh.history.append((vh.start, vh.getTimeWindow()[0]))
   
 
     def getPlaces(self):
@@ -86,6 +86,22 @@ class Problem:
                             pass
                         weight += 10 * (vehicle.max_capacity - vehicle.capacity)
 
+    def getBestVeh(self,inst,reqID):
+        start = inst.requests[reqID].serviceBegin
+        start -= inst.requests[reqID].embark * 2
+        start -= self.distMatrix[inst.requests[reqID].startPlace][inst.requests[reqID].destPlace]
+        minTime = datetime.timedelta(hours=60)
+        minId = -1
+        for v in range(len(inst.vehicles)):
+            if self.setActivityForward(inst,v,reqID):
+                if self.distMatrix[inst.requests[reqID].vehicles[v].getLastActivity().endPlace][inst.requests[reqID].startPlace]<minTime:
+                    minTime=self.distMatrix[inst.requests[reqID].vehicles[v].getLastActivity().endPlace][inst.requests[reqID].startPlace]
+                    minId=v
+        if minId==-1:
+            return None
+        else:
+            return minId
+
     def orderReq(self):
         for i in range(len(self.requests)):
             for j in range(len(self.requests)):
@@ -93,7 +109,7 @@ class Problem:
                     a = self.requests[i]
                     self.requests[i] = self.requests[j]
                     self.requests[j] = a
-        return self.requests
+        # return self.requests
     
     def setActivityForward(self,inst,vehInd,reqInd):
         if inst.requsts[reqInd].category not in inst.vehicles[vehInd].canTake:
@@ -103,11 +119,27 @@ class Problem:
             return False
         total_time = self.distMatrix[vehAct.endPlace][inst.requests[reqInd].startPlace]
         total_time += inst.requests[reqInd].embark*2
-        total_time += self.distMatrix[inst.requests[reqInd].startPlace][inst.requests[reqInd].endPlace]
+        total_time += self.distMatrix[inst.requests[reqInd].startPlace][inst.requests[reqInd].destPlace]
         if vehAct.endTime+total_time > inst[vehInd].getTimeWindow()[1]:
             return False
         if inst.requests[reqInd].serviceBegin-total_time<inst.vehicles[vehInd].getTimeWindow()[0]:
             return False
+        return True
+    
+    def setActivityBackward(self,inst,vehInd,reqInd):
+        if inst.requsts[reqInd].category not in inst.vehicles[vehInd].canTake:
+            return False
+        vehAct = inst.vehicles[vehInd].getLastActivity()
+        if inst.requests[reqInd].placesVehicle > inst.vehicles[vehInd].capacity - vehAct.load:
+            return False
+        total_time = self.distMatrix[vehAct.endPlace][inst.requests[reqInd].destPlace]
+        total_time += inst.requests[reqInd].embark*2
+        total_time += self.distMatrix[inst.requests[reqInd].destPlace][inst.requests[reqInd].endPlace]
+        if vehAct.endTime+total_time > inst[vehInd].getTimeWindow()[1]:
+            return False
+        if inst.requests[reqInd].serviceBegin+inst.requests[reqInd].serviceDuration<inst.vehicles[vehInd].getTimeWindow()[0]:
+            return False
+        return True
 
     def subsearch(self,inst,initDepth,layersLeft):
         minH = 1000
@@ -123,6 +155,12 @@ class Problem:
             #   return m1
             # else
             #   return m2
+
+    def search(self,depth):
+        self.getRequests()
+        self.orderReq()
+        initInst = Instance.Instance(self)
+        # to be completed using subsearch
 
     def insertForward(self, inst, reqID, vehID):
         startPlace = inst.vehicle[vehID].history[-1][0]
@@ -156,10 +194,6 @@ class Problem:
         inst.vehicle[vehID].setActivity(act)
         return inst
 
-    def search(self,depth):
-        self.orderReq()
-        initInst = Instance.Instance(self)
-        # to be completed using subsearch
 
 
 
