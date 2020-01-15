@@ -186,6 +186,7 @@ class Problem:
         timeleft = midTime - endTime
         requestIndex = reqID
         load = inst.request[reqID].placesVehicle
+        timeSurplus = self.maxWaitTime - (inst.requests[reqID].serviceBegin - startTime)
         
         
         act = Activity.Activity(startPlace, startTime, midPlace, midTime, endPlace, endTime, timeleft, requestIndex, load)

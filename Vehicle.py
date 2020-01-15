@@ -8,16 +8,14 @@ class Vehicle:
             “canTake” which is a set of categories of patients that the vehicle can take.
             “start” and “end” which are the ids of the starting and ending depots of the vehicle. A -1 value indicates that the vehicle has no depot.
             “max_capacity” which is the capacity of the vehicle.
-            “capacity” which is the remaining capacity of the vehicle.
             “availability” which is a set of time windows when the vehicle is available. Each time window is encoded by a string having the following format: “HHhMM:HHhMM”.
-            "history" list of tuples: location-time
+            "history" list of activities
         """
         self.id = id1
         self.canTake = canTake
         self.start = start
         self.end = end
         self.max_capacity = capacity
-        self.capacity = capacity
         self.availability = availability
         self.history = list()
 
