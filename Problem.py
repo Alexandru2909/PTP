@@ -67,21 +67,46 @@ class Problem:
         minSlack = minSlack(request)
         return minSlack.seconds/60 + no_solutions*10
     
-    def getBestVehicle(self, request):
-        max_weight = 0
-        weight = 0
-        timeToDeliver = 0
-        best_vehicle = None
+    def getBestVehicle(self, request, inst):
+        max_weight_forward = 0
+        max_weight_backward = 0
+        best_vehicle_forward = None
+        best_vehicle_backward = None
         for vehicle in self.vehicles:
-            if request.category in vehicle.canTake:
-                timeToArriveToPatient = self.distMatrix[vehicle.history[-1][0]][request.startPlace]
-                timeOfArrivalToPatient = vehicle.history[-1][1] + timeToArriveToPatient
-                if vehicle.capacity >= request.placesVehicle:
-                    if vehicle.max_capacity > vehicle.capacity:
-                        cantDeliver = False
-                        for patient in vehicle.patients_list:
-                            pass
-                        weight += 10 * (vehicle.max_capacity - vehicle.capacity)
+            # forward
+            weight = 0
+            test_instance = Instance.Instance(inst)
+            test_instance = self.insertForward(test_instance, request.id, vehicle.id)
+            isVehicleValid = setActivityForward(test_instance, vehicle.id)
+            if isVehicleValid:
+                weight += 10 * (vehicle.max_capacity - vehicle.capacity)
+                vehicleLastLocation = vehicle.getLastAct(request.serviceBegin).place
+                timeToDeliver = self.reqTime(test_instance, vehicle.id, request.id, 0)
+                weight += timeToDeliver.seconds/60
+
+                if weight > max_weight_forward:
+                    max_weight_forward = weight
+                    best_vehicle_forward = vehicle
+
+            # backward
+            weight = 0
+            test_instance = Instance.Instance(inst)
+            test_instance.self.insertBackward(test_instance, request.id, vehicle.id)
+            isVehicleValid = setActivityBackward(test_instance, vehicle.id)
+            if isVehicleValid:
+                weight += 10 * (vehicle.max_capacity - vehicle.max_capacity)
+                vehicleLastLocation = vehicle.getLastAct(request.serviceBegin + request.serviceDuration).place
+                timeToDeliver = self.reqTime(test_instance, vehicle.id, request.id, 1)
+                weight += timeToDeliver.seconds/60
+
+                if weight > max_weight_backward:
+                    max_weight_backward = weight
+                    best_vehicle_backward = vehicle
+                
+
+        return (best_vehicle_forward, best_vehicle_backward)
+
+
 
     # def getBestVeh(self,inst,reqID):
     #     start = inst.requests[reqID].serviceBegin

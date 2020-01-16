@@ -18,7 +18,8 @@ class Request:
     #If the request was selected (1) or not (0)
     selected = 0
     # Vehicles that satisfy the request
-    vehicles = 0
+    vehicleForward = 0
+    vehicleBackward = 0
     # Activities indexes list
     activities = list()
 
@@ -47,3 +48,13 @@ class Request:
     def getEmbark(self):
         H, M = self.embark.split("h")
         self.embark = datetime.timedelta(hours=int(H), minutes=int(M))
+
+    # def getActivities(self, vehicle):
+    #     activities = list()
+    #     activities.append()
+
+    # def setVehicleForward(self, vehicle):
+    #     pass
+    
+    # def setVehicleBackward(self, vehicle):
+    #     pass
