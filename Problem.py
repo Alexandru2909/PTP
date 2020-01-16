@@ -197,40 +197,43 @@ class Problem:
         # to be completed using subsearch
 
     # TODO Alex
-    # def insertForward(self, inst, reqID, vehID):
-    #     start = Activity.Activity(inst.vehicle[vehID].history[-1][0])
-    #     startPlace = inst.vehicle[vehID].history[-1][0]
-    #     startTime = inst.request[reqID].serviceBegin - (self.distMatrix[startPlace][inst.requests[reqID].startPlace] + self.distMatrix[inst.request[reqID].embark]*2 + self.distMatrix[inst.request[reqID].startPlace][inst.request[reqID].destPlace])
-    #     midPlace = inst.request[reqID].startPlace
-    #     midTime = inst.request[reqID].serviceBegin - (self.distMatrix[inst.request[reqID].embark]*2 + self.distMatrix[inst.request[reqID].startPlace][inst.request[reqID].destPlace])
-    #     endPlace = inst.request[reqID].destPlace
-    #     endTime = inst.request[reqID].serviceBegin
-    #     timeleft = inst.request[reqID].serviceBegin - endTime
-    #     requestIndex = reqID
-    #     load = inst.request[reqID].placesVehicle
-    #     timeSurplus = self.maxWaitTime - (inst.requests[reqID].serviceBegin - startTime)
-        
-    #     act = Activity.Activity(startPlace, startTime, midPlace, midTime, endPlace, endTime, timeleft, requestIndex, load)
-    #     inst.vehicle[vehID].setActivity(act)
-        
-    #     return inst
+    def insertForward(self, inst, reqID, vehID):
+        veh = inst.getVehbyID(vehID)
+        req = inst.getReqbyID(reqID)
+        pacient_time = req.serviceBegin - (req.embark + self.distMatrix[req.startPlace][req.destPlace])
+        # starting_time = req.serviceBegin - (self.distMatrix[veh.getLastAct().place][req.startPlace] + self.distMatrix[req.embark]*2 + self.distMatrix[req.startPlace][req.destPlace])
+        beforeAct = veh.getLastAct(pacient_time)
+        starting_time = pacient_time-self.distMatrix[beforeAct.place][req.startPlace]-req.embark
+        beforeAct = veh.getLastAct(starting_time)
+        if beforeAct != veh.getLastAct(pacient_time):
+            return False
+        # startTime = inst.request[reqID].serviceBegin - (self.distMatrix[veh.getLastAct().place][inst.requests[reqID].startPlace] + self.distMatrix[inst.request[reqID].embark]*2 + self.distMatrix[inst.request[reqID].startPlace][inst.request[reqID].destPlace])
+        startAct = Activity.Activity(beforeAct.place,starting_time,req.idReq,beforeAct.load,beforeAct.load)
+        vehicleLoad = beforeAct.load+req.placesVehicle
+        midAct = Activity.Activity(req.startPlace,pacient_time,req.idReq,vehicleLoad,beforeAct.load)
+        beforeAct = veh.getLastAct(req.serviceBegin)
+        endAct = Activity.Activity(req.destPlace,req.serviceBegin,req.idReq,beforeAct.load,vehicleLoad)        
+        return True
 
-    # def insertBackward(self, inst, reqID, vehID):
-    #     startPlace = inst.vehicle[vehID].history[-1][0]
-    #     startTime = (inst.request[reqID].serviceBegin + inst.request[reqID].serviceDuration) - self.distMatrix[inst.vehicle[vehID].history[-1][0]][inst.request[reqID].destPlace]
-    #     midPlace = inst.request[reqID].destPlace
-    #     midTime = inst.request[reqID].serviceBegin + inst.request[reqID].serviceDuration + inst.request[reqID].embark*2
-    #     endPlace = inst.request[reqID].returnPlace
-    #     endTime = inst.request[reqID].serviceDuration + self.distMatrix[inst.request[reqID].destPlace][inst.request[reqID].startPlace]
-    #     timeleft = midTime - endTime
-    #     requestIndex = reqID
-    #     load = inst.request[reqID].placesVehicle
-    #     timeSurplus = self.maxWaitTime - (inst.requests[reqID].serviceBegin - startTime)
+    def insertBackward(self, inst, reqID, vehID):
+        veh = inst.getVehbyID(vehID)
+        req = inst.getReqbyID(reqID)
+        pacient_time = req.serviceBegin + req.serviceDuration + req.embark
+        # starting_time = req.serviceBegin - (self.distMatrix[veh.getLastAct().place][req.startPlace] + self.distMatrix[req.embark]*2 + self.distMatrix[req.startPlace][req.destPlace])
+        beforeAct = veh.getLastAct(pacient_time)
+        starting_time = pacient_time-self.distMatrix[beforeAct.place][req.startPlace]-req.embark
+        beforeAct = veh.getLastAct(starting_time)
+        if beforeAct != veh.getLastAct(pacient_time):
+            return False
+        # startTime = inst.request[reqID].serviceBegin - (self.distMatrix[veh.getLastAct().place][inst.requests[reqID].startPlace] + self.distMatrix[inst.request[reqID].embark]*2 + self.distMatrix[inst.request[reqID].startPlace][inst.request[reqID].destPlace])
+        startAct = Activity.Activity(beforeAct.place,starting_time,req.idReq,beforeAct.load,beforeAct.load)
+        vehicleLoad = beforeAct.load+req.placesVehicle
+        midAct = Activity.Activity(req.destPlace,pacient_time,req.idReq,vehicleLoad,beforeAct.load)
+        endTime = pacient_time + self.distMatrix[req.destPlace][req.returnPlace]+req.embark
+        beforeAct = veh.getLastAct(endTime)
+        endAct = Activity.Activity(req.returnPlace,endTime,req.idReq,beforeAct.load-req.placesVehicle,beforeAct.load)
+        return True
         
-        
-    #     act = Activity.Activity(startPlace, startTime, midPlace, midTime, endPlace, endTime, timeleft, requestIndex, load)
-    #     inst.vehicle[vehID].setActivity(act)
-    #     return inst
 
 # for testing
 # x = Problem('Models/easy/PTP-RAND-1_8_4_32.json')

@@ -48,13 +48,3 @@ class Request:
     def getEmbark(self):
         H, M = self.embark.split("h")
         self.embark = datetime.timedelta(hours=int(H), minutes=int(M))
-
-    # def getActivities(self, vehicle):
-    #     activities = list()
-    #     activities.append()
-
-    # def setVehicleForward(self, vehicle):
-    #     pass
-    
-    # def setVehicleBackward(self, vehicle):
-    #     pass
