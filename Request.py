@@ -17,6 +17,11 @@ class Request:
     embark = None
     #If the request was selected (1) or not (0)
     selected = 0
+    # Vehicles that satisfy the request
+    vehicles = 0
+    # Activities indexes list
+    activities = list()
+
     def __init__(self,idReq,start,dest,ret,places,servicebegin,servicedur,category,embarkdisembark):
         self.idReq = idReq
         self.startPlace=start

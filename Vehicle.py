@@ -24,13 +24,19 @@ class Vehicle:
 
     def setActivity(self,act):
         self.history.append(act)
-        self.history.sort(key=lambda x:x.startTime)
     
     def deleteActivity(self,act):
         self.history.remove(act)
 
     def __eq__(self,other):
-        return self.id == other.id and self.canTake == other.canTake and self.start == other.start and self.end == other.end and self.capacity == other.capacity and self.availability == other.availability
+        return self.id == other.id and self.canTake == other.canTake and self.start == other.start and self.end == other.end and self.max_capacity == other.max_capacity and self.availability == other.availability
+
+    def getLastAct(self,time):
+        history_sorted = list.sort(self.history,key=lambda y:y.time)
+        i = 0
+        while history_sorted[i].time<time and i<len(history_sorted):
+            i+=1
+        return history_sorted[i-1]
 
     def getTimeWindow(self):
         # windows = []
