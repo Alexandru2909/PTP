@@ -47,3 +47,4 @@ class Request:
     def getEmbark(self):
         H, M = self.embark.split("h")
         self.embark = datetime.timedelta(hours=int(H), minutes=int(M))
+        
