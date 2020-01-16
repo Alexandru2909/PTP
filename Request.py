@@ -18,7 +18,8 @@ class Request:
     #If the request was selected (1) or not (0)
     selected = 0
     # Vehicles that satisfy the request
-    vehicles = 0
+    vehicleForward = 0
+    vehicleBackward = 0
     # Activities indexes list
     activities = list()
 

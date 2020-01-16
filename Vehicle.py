@@ -36,6 +36,8 @@ class Vehicle:
         i = 0
         while history_sorted[i].time<time and i<len(history_sorted):
             i+=1
+        if i==0:
+            return history_sorted[0]
         return history_sorted[i-1]
 
     def getTimeWindow(self):
