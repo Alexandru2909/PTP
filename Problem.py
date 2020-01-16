@@ -108,6 +108,17 @@ class Problem:
                     self.requests[j] = a
         # return self.requests
     
+    def getSiblingActivities(self, activity, history):
+        ret_list = list()
+        for act in history:
+            if len(ret_list) == 3:
+                break
+            if act.requestID == activity.requestID:
+                ret_list.append(act)
+        ret_list.sort(key=lambda act: act.time)
+
+        return ret_list
+
     # TODO Dragos
     def setActivityForward(self,inst,vehID):
         total_load = 0
