@@ -109,20 +109,44 @@ class Problem:
         # return self.requests
     
     # TODO Dragos
-    # def setActivityForward(self,inst,vehInd):
-    #     if inst.requsts[reqInd].category not in inst.vehicles[vehInd].canTake:
-    #         return False
-    #     vehAct = inst.vehicles[vehInd].getLastActivity()
-    #     if inst.requests[reqInd].placesVehicle > inst.vehicles[vehInd].capacity - vehAct.load:
-    #         return False
-    #     total_time = self.distMatrix[vehAct.endPlace][inst.requests[reqInd].startPlace]
-    #     total_time += inst.requests[reqInd].embark*2
-    #     total_time += self.distMatrix[inst.requests[reqInd].startPlace][inst.requests[reqInd].destPlace]
-    #     if vehAct.endTime+total_time > inst[vehInd].getTimeWindow()[1]:
-    #         return False
-    #     if inst.requests[reqInd].serviceBegin-total_time<inst.vehicles[vehInd].getTimeWindow()[0]:
-    #         return False
-    #     return True
+    def setActivityForward(self,inst,vehID):
+        total_load = 0
+        vehInd = 0
+        for i in range(len(inst.vehicles)):
+            if inst.vehicles[i].id == vehInd:
+                vehInd = i
+                break
+        for act in inst.vehicles[vehInd].history:
+            for req in inst.requests:
+                if act.requestID == req.idReq:
+                    if req.category not in inst.vehicles[vehInd].canTake:
+                        return False
+                    total_load += act.load
+        if inst.vehicles[vehInd].canTake * 3 < total_load:
+            return False
+        # for act in inst.vehicles[vehInd].history:
+        #     total_time = datetime.timedelta(0)
+        #     actvs = self.getSibiligActivities(act, inst.vehicles[vehInd].history)
+        #     if self.distMatrix[actvs[0]][actvs[1]] > self.maxWaitTime:
+        #         return False
+        #     if act.time - distMatrix[actvs[0]][actvs[1]] < inst.vehicles[vehInd].getTimeWindow()[0]:
+        #         return False
+        #     total_time = self.distMatrix[actvs[0]][actvs[1]]
+        #     if self.distMatrix[actvs[1]][actvs[2]] > self.maxWaitTime:
+        #         return False
+        #     total_time += self.distMatrix[actvs[1]][actvs[2]]
+        #     for req in inst.requests:
+        #         if req.idReq == act.requestID:
+        #             total_time += req.embark * 2
+        #     if total_time < self.maxWaitTime
+        #         return False
+        for act in inst.vehicles[vehInd].history:
+            if 
+        # if vehAct.endTime+total_time > inst[vehInd].getTimeWindow()[1]:
+        #     return False
+        # if inst.requests[reqInd].serviceBegin-total_time<inst.vehicles[vehInd].getTimeWindow()[0]:
+        #     return False
+        return True
     # TODO Dragos
     # def setActivityBackward(self,inst,vehInd,reqInd):
     #     if inst.requsts[reqInd].category not in inst.vehicles[vehInd].canTake:
