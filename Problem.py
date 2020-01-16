@@ -77,7 +77,7 @@ class Problem:
             weight = 0
             test_instance = Instance.Instance(inst)
             test_instance = self.insertForward(test_instance, request.id, vehicle.id)
-            isVehicleValid = setActivityForward(test_instance, vehicle.id)
+            isVehicleValid = self.checkVehicle(test_instance, vehicle.id)
             if isVehicleValid:
                 weight += 10 * (vehicle.max_capacity - vehicle.capacity)
                 vehicleLastLocation = vehicle.getLastAct(request.serviceBegin).place
@@ -96,7 +96,7 @@ class Problem:
             if isVehicleValid:
                 weight += 10 * (vehicle.max_capacity - vehicle.max_capacity)
                 vehicleLastLocation = vehicle.getLastAct(request.serviceBegin + request.serviceDuration).place
-                timeToDeliver = self.checkVehicle(test_instance, vehicle.id, request.id, 1)
+                timeToDeliver = self.reqTime(test_instance, vehicle.id, request.id, 1)
                 weight += timeToDeliver.seconds/60
 
                 if weight > max_weight_backward:
