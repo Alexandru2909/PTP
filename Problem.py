@@ -13,7 +13,7 @@ class Problem:
     patients = list()
     requests = list()
     distMatrix = list()
-    maxWaitTime = list()
+    maxWaitTime = None
 
     def __init__(self, jsonFile):
         print("Json file is : " + jsonFile.split("/")[-1])
@@ -92,11 +92,11 @@ class Problem:
             weight = 0
             test_instance = Instance.Instance(inst)
             test_instance.self.insertBackward(test_instance, request.id, vehicle.id)
-            isVehicleValid = setActivityBackward(test_instance, vehicle.id)
+            isVehicleValid = self.checkVehicle(test_instance, vehicle.id)
             if isVehicleValid:
                 weight += 10 * (vehicle.max_capacity - vehicle.max_capacity)
                 vehicleLastLocation = vehicle.getLastAct(request.serviceBegin + request.serviceDuration).place
-                timeToDeliver = self.reqTime(test_instance, vehicle.id, request.id, 1)
+                timeToDeliver = self.checkVehicle(test_instance, vehicle.id, request.id, 1)
                 weight += timeToDeliver.seconds/60
 
                 if weight > max_weight_backward:
