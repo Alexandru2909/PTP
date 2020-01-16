@@ -117,6 +117,8 @@ class Problem:
                 ret_list.append(act)
         ret_list.sort(key=lambda act: act.time)
 
+        return ret_list
+
     # TODO Dragos
     # def setActivityForward(self,inst,vehInd):
     #     if inst.requsts[reqInd].category not in inst.vehicles[vehInd].canTake:
