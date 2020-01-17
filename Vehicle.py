@@ -32,14 +32,14 @@ class Vehicle:
         return self.id == other.id and self.canTake == other.canTake and self.start == other.start and self.end == other.end and self.max_capacity == other.max_capacity and self.availability == other.availability
 
     def getLastAct(self,time):
-        history_sorted = list.sort(self.history,key=lambda y:y.time)
+        history_sorted = sorted(self.history,key=lambda y:y.time)
         i = 0
-        if history_sorted==None:
+        if len(history_sorted)==0:
             return Activity.Activity(self.start,self.getTimeWindow()[0],-1,0,0)
-        while history_sorted[i].time<time and i<len(history_sorted):
+        while i<len(history_sorted) and history_sorted[i].time<time :
             i+=1
-        if i==0:
-            return history_sorted[0]
+        if i==len(history_sorted):
+            return history_sorted[-1]
         return history_sorted[i-1]
 
     def getTimeWindow(self):

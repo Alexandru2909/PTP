@@ -229,10 +229,10 @@ class Problem:
         req = inst.getReqbyID(reqID)
         pacient_time = req.serviceBegin - (req.embark + self.distMatrix[req.startPlace][req.destPlace])
         # starting_time = req.serviceBegin - (self.distMatrix[veh.getLastAct().place][req.startPlace] + self.distMatrix[req.embark]*2 + self.distMatrix[req.startPlace][req.destPlace])
-        beforeAct = veh.getLastAct(pacient_time)
-        starting_time = pacient_time-self.distMatrix[beforeAct.place][req.startPlace]-req.embark
+        beforeAct1 = veh.getLastAct(pacient_time)
+        starting_time = pacient_time-self.distMatrix[beforeAct1.place][req.startPlace]-req.embark
         beforeAct = veh.getLastAct(starting_time)
-        if beforeAct != veh.getLastAct(pacient_time):
+        if beforeAct1 != beforeAct:
             return False
         # startTime = inst.request[reqID].serviceBegin - (self.distMatrix[veh.getLastAct().place][inst.requests[reqID].startPlace] + self.distMatrix[inst.request[reqID].embark]*2 + self.distMatrix[inst.request[reqID].startPlace][inst.request[reqID].destPlace])
         startAct = Activity.Activity(beforeAct.place,starting_time,req.idReq,beforeAct.load,beforeAct.load)
@@ -240,9 +240,9 @@ class Problem:
         midAct = Activity.Activity(req.startPlace,pacient_time,req.idReq,vehicleLoad,beforeAct.load)
         beforeAct = veh.getLastAct(req.serviceBegin)
         endAct = Activity.Activity(req.destPlace,req.serviceBegin,req.idReq,beforeAct.load,vehicleLoad)        
-        inst.vehicles.getVehbyID(vehID).append(startAct)
-        inst.vehicles.getVehbyID(vehID).append(midAct)
-        inst.vehicles.getVehbyID(vehID).append(endAct)
+        inst.getVehbyID(vehID).history.append(startAct)
+        inst.getVehbyID(vehID).history.append(midAct)
+        inst.getVehbyID(vehID).history.append(endAct)
         return True
 
     def insertBackward(self, inst, reqID, vehID):
@@ -251,20 +251,23 @@ class Problem:
         pacient_time = req.serviceBegin + req.serviceDuration + req.embark
         # starting_time = req.serviceBegin - (self.distMatrix[veh.getLastAct().place][req.startPlace] + self.distMatrix[req.embark]*2 + self.distMatrix[req.startPlace][req.destPlace])
         beforeAct = veh.getLastAct(pacient_time)
-        starting_time = pacient_time-self.distMatrix[beforeAct.place][req.startPlace]-req.embark
+        starting_time = pacient_time-self.distMatrix[beforeAct.place][req.destPlace]-req.embark
         beforeAct = veh.getLastAct(starting_time)
         if beforeAct != veh.getLastAct(pacient_time):
             return False
         # startTime = inst.request[reqID].serviceBegin - (self.distMatrix[veh.getLastAct().place][inst.requests[reqID].startPlace] + self.distMatrix[inst.request[reqID].embark]*2 + self.distMatrix[inst.request[reqID].startPlace][inst.request[reqID].destPlace])
         startAct = Activity.Activity(beforeAct.place,starting_time,req.idReq,beforeAct.load,beforeAct.load)
         vehicleLoad = beforeAct.load+req.placesVehicle
+        inst.getVehbyID(vehID).history.append(startAct)
         midAct = Activity.Activity(req.destPlace,pacient_time,req.idReq,vehicleLoad,beforeAct.load)
-        endTime = pacient_time + self.distMatrix[req.destPlace][req.returnPlace]+req.embark
+        inst.getVehbyID(vehID).history.append(midAct)
+        if req.returnPlace==-1:
+            endTime = pacient_time + self.distMatrix[req.destPlace][req.destPlace]+req.embark
+        else:
+            endTime = pacient_time + self.distMatrix[req.destPlace][req.returnPlace]+req.embark
         beforeAct = veh.getLastAct(endTime)
         endAct = Activity.Activity(req.returnPlace,endTime,req.idReq,beforeAct.load-req.placesVehicle,beforeAct.load)
-        inst.vehicles.getVehbyID(vehID).append(startAct)
-        inst.vehicles.getVehbyID(vehID).append(midAct)
-        inst.vehicles.getVehbyID(vehID).append(endAct)
+        inst.getVehbyID(vehID).history.append(endAct)
         return True
         
 
