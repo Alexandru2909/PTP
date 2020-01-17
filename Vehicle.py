@@ -47,12 +47,12 @@ class Vehicle:
         return history_sorted[i-1]
 
     def getTimeWindow(self):
-        # windows = []
-        # for it in self.availability:
-        start, end = self.availability.split(":")
-        startH, startM = start.split("h")
-        endH, endM = end.split("h")
-        st = datetime.timedelta(hours=int(startH), minutes=int(startM))
-        en = datetime.timedelta(hours=int(endH), minutes=int(endM))
-        # windows.append((st, en))
-        return (st, en)
+        windows = []
+        for it in self.availability:
+            start, end = it.split(":")
+            startH, startM = start.split("h")
+            endH, endM = end.split("h")
+            st = datetime.timedelta(hours=int(startH), minutes=int(startM))
+            en = datetime.timedelta(hours=int(endH), minutes=int(endM))
+            windows.append((st, en))
+        return windows

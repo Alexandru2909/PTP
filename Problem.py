@@ -31,9 +31,8 @@ class Problem:
                 self.places.append(Place.Place(place['id'], place['lat'], place['long'], place['category']))
 
             for vehicle in data['vehicles']:
-                for i in range(len(vehicle["availability"])):
-                    self.vehicles.append(Vehicle.Vehicle(vehicle["id"], vehicle["canTake"], vehicle["start"], vehicle["end"],
-                                                    vehicle["capacity"], vehicle["availability"][i]))
+                self.vehicles.append(Vehicle.Vehicle(vehicle["id"], vehicle["canTake"], vehicle["start"], vehicle["end"],
+                                                vehicle["capacity"], vehicle["availability"]))
                 # print( vehicle["availability"],self.vehicles[-1].availability[0])
 
             for patient in data['patients']:
@@ -185,21 +184,18 @@ class Problem:
             # print(i,self.distMatrix[actvts[i-1].place][actvts[i].place],(actvts[i].time - actvts[i-1].time))
             if self.distMatrix[actvts[i-1].place][actvts[i].place] > (actvts[i].time - actvts[i-1].time):
                 return False
-            if actvts[i].load != actvts[i].lastLoad:
-                total_time += inst.getReqbyID(actvts[i].requestID).embark
-                # for j in range(len(inst.requests)):
-                #     if req.idReq == actvts[j].requestID:
-                #         total_time += inst.requests[j].embark
-                #         break
-            total_time += self.distMatrix[actvts[i-1].place][actvts[i].place]
-        if total_time > inst.vehicles[vehInd].getTimeWindow()[1] - inst.vehicles[vehInd].getTimeWindow()[0]:
-            return False
         d = dict()
         for i in actvts:
             if i.requestID not in d.keys():
-                d[i.requestID]=0
+                d[i.requestID]=1
+                total_time = self.reqTime(inst,vehID,i.requestID,0)
                 if self.reqTime(inst,vehID,i.requestID,0) > self.maxWaitTime:
                     return False
+                checkedWindow=False
+                for j in inst.getVehbyID(vehID).getTimeWindow():
+                    if i.time>j[0] and i.time+total_time<j[1]:
+                        checkedWindow=True
+                return checkedWindow
             else:
                 d[i.requestID]+=1
             if d[i.requestID]==4:
@@ -229,7 +225,8 @@ class Problem:
             # insert here heuristic returning int
         else:
             # m1 = self.subsearch(inst,initDepth+1,layersLeft-1)
-            h1 = self.getBestRequest(inst.requests[initDepth],number_reqs)
+            # h1 = self.getBestRequest(inst.requests[initDepth],number_reqs)
+            h1 = self.subsearch(inst,initDepth+1,0)
             copyInst = Instance.Instance(inst)
             copyInst.requests[initDepth].selected=1
             v = self.getBestVehicle(copyInst.requests[initDepth],copyInst)
