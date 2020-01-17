@@ -1,4 +1,4 @@
-import datetime 
+import datetime, Activity
 
 class Vehicle:
     def __init__(self, id1, canTake, start, end, capacity, availability):
@@ -19,8 +19,8 @@ class Vehicle:
         self.availability = availability
         self.history = list()
 
-    def getLastActivity(self):
-        return self.history[-1]
+    # def getLastActivity(self):
+    #     return self.history[-1]
 
     def setActivity(self,act):
         self.history.append(act)
@@ -34,6 +34,8 @@ class Vehicle:
     def getLastAct(self,time):
         history_sorted = list.sort(self.history,key=lambda y:y.time)
         i = 0
+        if history_sorted==None:
+            return Activity.Activity(self.start,self.getTimeWindow()[0],-1,0,0)
         while history_sorted[i].time<time and i<len(history_sorted):
             i+=1
         if i==0:
