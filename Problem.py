@@ -209,6 +209,7 @@ class Problem:
    
 
     def subsearch(self,inst,initDepth,layersLeft):
+        print('     ',initDepth,layersLeft)
         number_reqs = 0
         for i in inst.requests:
             if i.selected==1:
@@ -219,7 +220,7 @@ class Problem:
             copyInst.requests[initDepth].selected=1
             v = self.getBestVehicle(copyInst.requests[initDepth],copyInst)
             if v==None:
-                return -1
+                return h1
             self.insertForward(copyInst,copyInst.requests[initDepth].idReq,v[0])
             self.insertBackward(copyInst,copyInst.requests[initDepth].idReq,v[1])
             h2 = self.getBestRequest(inst.requests[initDepth],number_reqs)
@@ -227,23 +228,33 @@ class Problem:
             # compare heuristic(inst,initDepth,slected=0) and heuristic(inst,initDepth,slected=1) and return min
             # insert here heuristic returning int
         else:
-            m1 = self.subsearch(inst,initDepth+1,layersLeft-1)
+            # m1 = self.subsearch(inst,initDepth+1,layersLeft-1)
+            h1 = self.getBestRequest(inst.requests[initDepth],number_reqs)
             copyInst = Instance.Instance(inst)
             copyInst.requests[initDepth].selected=1
             v = self.getBestVehicle(copyInst.requests[initDepth],copyInst)
+            if v==None:
+                return h1
             self.insertForward(copyInst,copyInst.requests[initDepth].idReq,v[0])
             self.insertBackward(copyInst,copyInst.requests[initDepth].idReq,v[1])
-            h1 = self.getBestRequest(inst.requests[initDepth],number_reqs) 
-            h2 = self.getBestRequest(inst.requests[initDepth],number_reqs) 
+            # h1 = self.getBestRequest(inst.requests[initDepth],number_reqs) 
+            # h2 = self.getBestRequest(inst.requests[initDepth],number_reqs) 
             m2 = self.subsearch(copyInst,initDepth+1,layersLeft-1)
+            if h1<m2:
+                return m2
+            m1 = self.subsearch(inst,initDepth+1,layersLeft-1)
             return max([m1,m2])
 
     def search(self,depth):
         self.getRequests()
         self.requests.sort(key = lambda x: x.serviceBegin)
         initInst = Instance.Instance(self)
-        for i in range(len(self.requests)):
+        initInst.requests.sort(key = lambda x: x.serviceBegin)
+        for i in range(len(initInst.requests)):
             # copyInst.requests[i].selected=0
+            if i+depth>len(initInst.requests)-1:
+                depth = len(initInst.requests)-i-1
+            print(i,'/',len(initInst.requests))
             h2 = self.subsearch(initInst,i,depth)
             copyInst = Instance.Instance(initInst)
             copyInst.requests[i].selected=1
