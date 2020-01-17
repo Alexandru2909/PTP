@@ -16,6 +16,7 @@ def getPlaceByID(placeID, places):
             return p
 
 def lineEquation(points):
+    print("Points: ", points)
     x1 = points[0][0]
     y1 = points[0][1]
     x2 = points[1][0]
@@ -40,72 +41,80 @@ def draw(inst, vehicles, places, patients, maxWaitTime):
     world_time = timedelta(hours=7, minutes=0)
     placesToBe = list()
     firtstIter = True
+
+    for place in places:
+        place.lat = abs(place.lat) * 50 + 700
+        place.long = abs(place.long) * 50 + 300
+               
+    font = pygame.font.Font('freesansbold.ttf', 20) 
+    text = font.render("str(world_time)", True, GREEN, BLUE) 
+    textRect = text.get_rect()
+    textRect.center = (100, 100) 
     while not done:
-        for event in pygame.event.get(): # User did something
-            if event.type == pygame.QUIT: # If user clicked close
+        screen.fill(WHITE)
+        for event in pygame.event.get(): 
+            if event.type == pygame.QUIT: 
                 done=True # F
 
-        screen.fill(WHITE)
+        s = world_time.seconds
+        hours = s //3600
+        s = s - (hours * 3600)
+        minutes = s // 60
+        seconds = s - (minutes * 60)
+        text_surface = font.render('{:02}:{:02}:{:02}'.format(int(hours), int(minutes), int(seconds)), True, (0, 0, 0))
+        screen.blit(text_surface, dest=(250, 150))
+
         # pygame.draw.arc(screen, BLACK,[210, 75, 150, 125], 0, pi/2, 2)
         # pygame.draw.arc(screen, BLACK, [-9.765289504081604 + 100, 0.09260531673304229 + 100, 50, 50], 0, 2*pi, 2)
         for place in places:
             if place.category == 0:
-                if firtstIter == True:
-                    pygame.draw.rect(screen, RED, [abs(place.lat) * 30 + 1000, abs((place.long) * 30 + 550), 15, 15], 2)
-                    place.lat = abs(place.lat) * 30 + 1000
-                    place.long = abs(place.long) * 30 + 550
-                else:
-                    pygame.draw.rect(screen, RED, [place.lat, place.long, 15, 15], 2)
+                pygame.draw.rect(screen, RED, [place.lat, place.long, 15, 15], 2)
             elif place.category == 1:
-                if firtstIter == True:
-                    pygame.draw.arc(screen, GREEN, [abs(place.lat) * 30 + 1000, abs((place.long) * 30 + 550), 25, 15], 0, 2*pi, 2)
-                    place.lat = abs(place.lat) * 30 + 1000
-                    place.long = abs(place.long) * 30 + 550
-                else:
-                    pygame.draw.arc(screen, GREEN, [place.lat, place.long, 25, 15], 0, 2*pi, 2)
+                pygame.draw.arc(screen, GREEN, [place.lat, place.long, 25, 15], 0, 2*pi, 2)
             else:
-                if firtstIter == True:
-                    pygame.draw.arc(screen, BLACK, [abs(place.lat) * 30 + 1000, abs((place.long) * 30 + 550), 15, 15], 0, 2*pi, 2)
-                    place.lat = abs(place.lat) * 30 + 1000
-                    place.long = abs(place.long) * 30 + 550
-                else:
-                    pygame.draw.arc(screen, BLACK, [place.lat, place.long, 15, 15], 0, 2*pi, 2)
-            print(place.lat, place.long)
+                pygame.draw.arc(screen, BLACK, [place.lat, place.long, 15, 15], 0, 2*pi, 2)
             
 
         vehicleImg = pygame.image.load('./images/vehicle.png')
         for vehicle in vehicles:
             if vehicle[1] == True:
-                vehicle[0].history = vehicle[0].history[1:]
+                print("Prima data")
                 startPlace = getPlaceByID(vehicle[0].start, places)
-                displayVehicle(screen, vehicleImg, abs(startPlace.lat) * 30 + 1000, abs(startPlace.long) * 30 + 550)
+                displayVehicle(screen, vehicleImg, startPlace.lat, startPlace.long)
+                # print(abs(startPlace.lat) * 50 + 700, abs(startPlace.long) * 50 + 300)
                 vehicle[1] = False
-                nextPlace = getPlaceByID(vehicle[0].history[0].place, places)
-                placesToBe.append((abs(startPlace.lat) * 30 + 1000, abs(startPlace.long) * 30 + 550))
-                placesToBe.append((abs(nextPlace.lat) * 30 + 1000, abs(nextPlace.long) * 30 + 550))
+                nextPlace = getPlaceByID(vehicle[0].history[1].place, places)
+                placesToBe.append([(startPlace.lat, startPlace.long), (nextPlace.lat, nextPlace.long)])
             else:
                 if vehicle[0].history[0].time == world_time:
+                    print("La activity")
                     vehicle[0].history = vehicle[0].history[1:]
                     vehicleIndex = vehicles.index(vehicle)
                     displayVehicle(screen, vehicleImg, placesToBe[vehicleIndex][1][0], placesToBe[vehicleIndex][1][1])
-                    nextPlace = getPlaceByID(vehicle.history[0].place, places)
+                    print("Old: ", placesToBe[vehicleIndex])
+                    nextPlace = getPlaceByID(vehicle[0].history[0].place, places)
                     placesToBe[vehicleIndex][0] = placesToBe[vehicleIndex][1]
-                    placesToBe[vehicleIndex][1] = ((abs(nextPlace.lat) * 30 + 1000, abs(nextPlace.long) * 30 + 550))
-                else:
-
-                    a,b = lineEquation(placesToBe)
+                    placesToBe[vehicleIndex][1] = ((nextPlace.lat, nextPlace.long))
+                    print("New: ", placesToBe[0])
+                elif vehicle[0].history[0].time < world_time:
+                    print("Pe parcurs")
+                    vehicleIndex = vehicles.index(vehicle)
+                    a,b = lineEquation(placesToBe[0])
                     deparure_time = vehicle[0].history[0].time
-                    x = (abs(placesToBe[0][0] - placesToBe[1][0])/((world_time.seconds/60) - (vehicle[0].history[0].time.seconds/60))) * (world_time.seconds/60) - (deparure_time.seconds/60)
+                    x = (abs(placesToBe[vehicleIndex][0][0] - placesToBe[vehicleIndex][1][0])/((vehicle[0].history[1].time.seconds/60) - (vehicle[0].history[0].time.seconds/60))) * (world_time.seconds/60) - (deparure_time.seconds/60)
                     y = a*x + b
                     displayVehicle(screen, vehicleImg, x, y)
+                else:
+                    vehicleIndex = vehicles.index(vehicle)
+                    displayVehicle(screen, vehicleImg, placesToBe[vehicleIndex][0][0], placesToBe[vehicleIndex][0][1])
 
 
         # displayVehicle(screen, vehicleImg, 500, 500)
         pygame.display.update()
         clock.tick(60)
 
-        print(world_time)
-        t.sleep(1)
+        # print(world_time)
+        t.sleep(0.1)
         world_time += timedelta(minutes=1)
         firtstIter = False
     pygame.quit()
