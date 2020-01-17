@@ -23,6 +23,8 @@ def lineEquation(points):
     y2 = points[1][1]
 
     # print(y2)
+    if x2 - x1 == 0:
+        return (1,1)
     m = (y2 - y1)/(x2 - x1)
     b = y1 - m*x1
     return m, b
