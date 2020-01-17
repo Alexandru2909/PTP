@@ -72,12 +72,15 @@ class Problem:
             # forward
             weight = 0
             test_instance = Instance.Instance(inst)
-            test_instance = self.insertForward(test_instance, request.id, vehicle.id)
+            isInsertValid = self.insertForward(test_instance, request.idReq, vehicle.id)
             isVehicleValid = self.checkVehicle(test_instance, vehicle.id)
-            if isVehicleValid:
-                weight += 10 * (vehicle.max_capacity - vehicle.capacity)
+            pacient_time = request.serviceBegin - (request.embark + self.distMatrix[request.startPlace][request.destPlace])
+            # starting_time = req.serviceBegin - (self.distMatrix[veh.getLastAct().place][req.startPlace] + self.distMatrix[req.embark]*2 + self.distMatrix[req.startPlace][req.destPlace])
+            beforeAct = vehicle.getLastAct(pacient_time)
+            if isInsertValid and isVehicleValid:
+                weight += 10 * (vehicle.max_capacity - beforeAct.load)
                 # vehicleLastLocation = vehicle.getLastAct(request.serviceBegin).place
-                timeToDeliver = self.reqTime(test_instance, vehicle.id, request.id, 0)
+                timeToDeliver = self.reqTime(test_instance, vehicle.id, request.idReq, 0)
                 weight += timeToDeliver.seconds/60
 
                 if weight > max_weight_forward:
@@ -86,13 +89,16 @@ class Problem:
 
             # backward
             weight = 0
-            test_instance = Instance.Instance(inst)
-            self.insertBackward(test_instance, request.id, vehicle.id)
+            # test_instance = Instance.Instance(inst)
+            isInsertValid = self.insertBackward(test_instance, request.idReq, vehicle.id)
             isVehicleValid = self.checkVehicle(test_instance, vehicle.id)
-            if isVehicleValid:
-                weight += 10 * (vehicle.max_capacity - vehicle.max_capacity)
+            pacient_time = request.serviceBegin + request.serviceDuration + request.embark + self.distMatrix[request.destPlace][request.returnPlace]
+            # starting_time = req.serviceBegin - (self.distMatrix[veh.getLastAct().place][req.startPlace] + self.distMatrix[req.embark]*2 + self.distMatrix[req.startPlace][req.destPlace])
+            beforeAct = vehicle.getLastAct(pacient_time)
+            if isInsertValid and isVehicleValid:
+                weight += 10 * (vehicle.max_capacity - beforeAct.load)
                 # vehicleLastLocation = vehicle.getLastAct(request.serviceBegin + request.serviceDuration).place
-                timeToDeliver = self.reqTime(test_instance, vehicle.id, request.id, 1)
+                timeToDeliver = self.reqTime(test_instance, vehicle.id, request.idReq, 1)
                 weight += timeToDeliver.seconds/60
 
                 if weight > max_weight_backward:
@@ -141,12 +147,12 @@ class Problem:
                 found += 1
                 if found == 1 and f_b == 0:
                     searching = True
-                    total_time = self.distMatrix[history[i].place][history[i+1].place]
+                    total_time = datetime.timedelta(0)
                 elif found == 3 and f_b == 0:
                     return total_time
                 elif found == 4:
                     searching=True
-                    total_time = self.distMatrix[history[i].place][history[i+1].place]
+                    total_time = datetime.timedelta(0)
                 elif found == 6:
                     return total_time
             if searching == True:
@@ -175,7 +181,7 @@ class Problem:
                     return False
         total_time = datetime.timedelta(0)
         for i in range(1, len(actvts)):
-            print(i,self.distMatrix[actvts[i-1].place][actvts[i].place],(actvts[i].time - actvts[i-1].time))
+            # print(i,self.distMatrix[actvts[i-1].place][actvts[i].place],(actvts[i].time - actvts[i-1].time))
             if self.distMatrix[actvts[i-1].place][actvts[i].place] > (actvts[i].time - actvts[i-1].time):
                 return False
             if actvts[i].load != actvts[i].lastLoad:
@@ -201,26 +207,54 @@ class Problem:
         return True
    
 
-    # def subsearch(self,inst,initDepth,layersLeft):
-    #     minH = 1000
-    #     if layersLeft==0:
-    #         pass
-    #         # compare heuristic(inst,initDepth,slected=0) and heuristic(inst,initDepth,slected=1) and return min
-    #         # insert here heuristic returning int
-    #     else:
-    #         pass
-    #         # m1 = heuristic(inst,initDepth,slected=0)
-    #         # m2 = heuristic(inst,initDepth,slected=1)
-    #         # if m1<m2
-    #         #   return m1
-    #         # else
-    #         #   return m2
+    def subsearch(self,inst,initDepth,layersLeft):
+        if layersLeft==0:
+            number_reqs = 0
+            for i in inst.requests:
+                if i.selected==1:
+                    number_reqs+=1
+            copyInst = Instance.Instance(inst)
+            copyInst.requests[initDepth].selected=1
+            v = self.getBestVehicle(copyInst.requests[initDepth],copyInst)
+            self.insertForward(copyInst,copyInst.requests[initDepth].idReq,v[0])
+            self.insertBackward(copyInst,copyInst.requests[initDepth].idReq,v[1])
+            h1 = self.getBestRequest(inst.requests[copyInst],number_reqs) 
+            h2 = self.getBestRequest(inst.requests[initDepth],number_reqs) 
+            return max([h1,h2])
+            # compare heuristic(inst,initDepth,slected=0) and heuristic(inst,initDepth,slected=1) and return min
+            # insert here heuristic returning int
+        else:
+            m1 = self.subsearch(inst,initDepth+1,layersLeft-1)
+            copyInst = Instance.Instance(inst)
+            copyInst.requests[initDepth].selected=1
+            v = self.getBestVehicle(copyInst.requests[initDepth],copyInst)
+            self.insertForward(copyInst,copyInst.requests[initDepth].idReq,v[0])
+            self.insertBackward(copyInst,copyInst.requests[initDepth].idReq,v[1])
+            h1 = self.getBestRequest(inst.requests[copyInst],number_reqs) 
+            h2 = self.getBestRequest(inst.requests[initDepth],number_reqs) 
+            m2 = self.subsearch(copyInst,initDepth+1,layersLeft-1)
+            return max([m1,m2])
 
-    # def search(self,depth):
-    #     self.getRequests()
-    #     self.orderReq()
-    #     initInst = Instance.Instance(self)
-    #     # to be completed using subsearch
+    def search(self,depth):
+        self.getRequests()
+        self.requests.sort(key = lambda x: x.serviceBegin)
+        initInst = Instance.Instance(self)
+        for i in range(len(self.requests)):
+            # copyInst.requests[i].selected=0
+            h2 = self.subsearch(initInst,i,depth)
+            copyInst = Instance.Instance(initInst)
+            copyInst.requests[i].selected=1
+            v = self.getBestVehicle(copyInst.requests[i],copyInst)
+            self.insertForward(copyInst,copyInst.requests[i].reqID,v[0])
+            self.insertBackward(copyInst,copyInst.requests[i].reqID,v[1])
+            h1 = self.subsearch(copyInst,i,depth)
+            if h1>h2:
+                initInst.copy(copyInst)
+            
+
+
+
+        # to be completed using subsearch
 
     # TODO Alex
     def insertForward(self, inst, reqID, vehID):
