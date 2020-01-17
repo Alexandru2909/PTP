@@ -38,9 +38,6 @@ class Problem:
             for patient in data['patients']:
                 self.patients.append(Patient.Patient(patient["id"], patient["category"],patient["load"],  patient["start"],
                                                 patient["destination"], patient["end"], patient["rdvTime"], patient["rdvDuration"], patient["srvDuration"]))
-            # for vh in self.vehicles:
-            #     # for i in range(len(vh.getTimeWindow())):
-            #     vh.history.append((vh.start, vh.getTimeWindow()[0]))
 
     def getPlaces(self):
         return self.places
@@ -107,33 +104,6 @@ class Problem:
         if best_vehicle_backward == None or best_vehicle_forward == None:
             return None
         return (best_vehicle_forward.id, best_vehicle_backward.id)
-
-
-
-    # def getBestVeh(self,inst,reqID):
-    #     start = inst.requests[reqID].serviceBegin
-    #     start -= inst.requests[reqID].embark * 2
-    #     start -= self.distMatrix[inst.requests[reqID].startPlace][inst.requests[reqID].destPlace]
-    #     minTime = datetime.timedelta(hours=60)
-    #     minId = -1
-    #     for v in range(len(inst.vehicles)):
-    #         if self.setActivityForward(inst,v,reqID):
-    #             if self.distMatrix[inst.requests[reqID].vehicles[v].getLastActivity().endPlace][inst.requests[reqID].startPlace]<minTime:
-    #                 minTime=self.distMatrix[inst.requests[reqID].vehicles[v].getLastActivity().endPlace][inst.requests[reqID].startPlace]
-    #                 minId=v
-    #     if minId==-1:
-    #         return None
-    #     else:
-    #         return minId
-
-    # def orderReq(self):
-    #     for i in range(len(self.requests)):
-    #         for j in range(len(self.requests)):
-    #             if self.requests[i].serviceBegin < self.requests[j].serviceBegin:
-    #                 a = self.requests[i]
-    #                 self.requests[i] = self.requests[j]
-    #                 self.requests[j] = a
-    #     # return self.requests
     
     def getSortedActivities(self, history):
         return sorted(history, key=lambda act: act.time)
@@ -224,8 +194,6 @@ class Problem:
             # compare heuristic(inst,initDepth,slected=0) and heuristic(inst,initDepth,slected=1) and return min
             # insert here heuristic returning int
         else:
-            # m1 = self.subsearch(inst,initDepth+1,layersLeft-1)
-            # h1 = self.getBestRequest(inst.requests[initDepth],number_reqs)
             h1 = self.subsearch(inst,initDepth+1,0)
             copyInst = Instance.Instance(inst)
             copyInst.requests[initDepth].selected=1
@@ -234,8 +202,6 @@ class Problem:
                 return h1
             self.insertForward(copyInst,copyInst.requests[initDepth].idReq,v[0])
             self.insertBackward(copyInst,copyInst.requests[initDepth].idReq,v[1])
-            # h1 = self.getBestRequest(inst.requests[initDepth],number_reqs) 
-            # h2 = self.getBestRequest(inst.requests[initDepth],number_reqs) 
             m2 = self.subsearch(copyInst,initDepth+1,layersLeft-1)
             if h1<m2:
                 return m2
@@ -265,22 +231,15 @@ class Problem:
                 initInst.copy(copyInst)
         return initInst
 
-
-
-        # to be completed using subsearch
-
-    # TODO Alex
     def insertForward(self, inst, reqID, vehID):
         veh = inst.getVehbyID(vehID)
         req = inst.getReqbyID(reqID)
         pacient_time = req.serviceBegin - (req.embark + self.distMatrix[req.startPlace][req.destPlace])
-        # starting_time = req.serviceBegin - (self.distMatrix[veh.getLastAct().place][req.startPlace] + self.distMatrix[req.embark]*2 + self.distMatrix[req.startPlace][req.destPlace])
         beforeAct1 = veh.getLastAct(pacient_time)
         starting_time = pacient_time-self.distMatrix[beforeAct1.place][req.startPlace]-req.embark
         beforeAct = veh.getLastAct(starting_time)
         if beforeAct1 != beforeAct:
             return False
-        # startTime = inst.request[reqID].serviceBegin - (self.distMatrix[veh.getLastAct().place][inst.requests[reqID].startPlace] + self.distMatrix[inst.request[reqID].embark]*2 + self.distMatrix[inst.request[reqID].startPlace][inst.request[reqID].destPlace])
         startAct = Activity.Activity(beforeAct.place,starting_time,req.idReq,beforeAct.load,beforeAct.load)
         vehicleLoad = beforeAct.load+req.placesVehicle
         midAct = Activity.Activity(req.startPlace,pacient_time,req.idReq,vehicleLoad,beforeAct.load)
@@ -295,13 +254,11 @@ class Problem:
         veh = inst.getVehbyID(vehID)
         req = inst.getReqbyID(reqID)
         pacient_time = req.serviceBegin + req.serviceDuration + req.embark
-        # starting_time = req.serviceBegin - (self.distMatrix[veh.getLastAct().place][req.startPlace] + self.distMatrix[req.embark]*2 + self.distMatrix[req.startPlace][req.destPlace])
         beforeAct = veh.getLastAct(pacient_time)
         starting_time = pacient_time-self.distMatrix[beforeAct.place][req.destPlace]-req.embark
         beforeAct = veh.getLastAct(starting_time)
         if beforeAct != veh.getLastAct(pacient_time):
             return False
-        # startTime = inst.request[reqID].serviceBegin - (self.distMatrix[veh.getLastAct().place][inst.requests[reqID].startPlace] + self.distMatrix[inst.request[reqID].embark]*2 + self.distMatrix[inst.request[reqID].startPlace][inst.request[reqID].destPlace])
         startAct = Activity.Activity(beforeAct.place,starting_time,req.idReq,beforeAct.load,beforeAct.load)
         vehicleLoad = beforeAct.load+req.placesVehicle
         inst.getVehbyID(vehID).history.append(startAct)

@@ -19,9 +19,6 @@ class Vehicle:
         self.availability = availability
         self.history = list()
 
-    # def getLastActivity(self):
-    #     return self.history[-1]
-
     def setActivity(self,act):
         self.history.append(act)
     
