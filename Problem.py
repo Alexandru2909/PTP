@@ -130,18 +130,14 @@ class Problem:
     #     # return self.requests
     
     def getSortedActivities(self, history):
-        return list.sort(history, key=lambda act: act.time)
+        return sorted(history, key=lambda act: act.time)
 
     def reqTime(self, inst, vehID, reqID, f_b):
         found = 0
         searching = False
-        history = self.getSortedActivities(inst.vehicles[vehID].history) 
-        for i in history:
-            if searching == True:
-                total_time += self.distMatrix[history[i].place][history[i+1].place]
-                if history[i].lastLoad != history[i].load:
-                    total_time += inst.requests[history[i].requestID].embark
-            if i.requestID == reqID:
+        history = self.getSortedActivities(inst.getVehbyID(vehID).history) 
+        for i in range(len(history)):
+            if history[i].requestID == reqID:
                 found += 1
                 if found == 1 and f_b == 0:
                     searching = True
@@ -153,13 +149,16 @@ class Problem:
                     total_time = self.distMatrix[history[i].place][history[i+1].place]
                 elif found == 6:
                     return total_time
+            if searching == True:
+                total_time += self.distMatrix[history[i].place][history[i+1].place]
+                if history[i].lastLoad != history[i].load:
+                    total_time += inst.getReqbyID(history[i].requestID).embark
 
     # TODO Dragos
     def checkVehicle(self,inst,vehID):
-        total_load = 0
         vehInd = 0
         for i in range(len(inst.vehicles)):
-            if inst.vehicles[i].id == vehInd:
+            if inst.vehicles[i].id == vehID:
                 vehInd = i
                 break
         for act in inst.vehicles[vehInd].history:
@@ -167,9 +166,8 @@ class Problem:
                 if act.requestID == req.idReq:
                     if req.category not in inst.vehicles[vehInd].canTake:
                         return False
-                    total_load += act.load
-        if inst.vehicles[vehInd].canTake * 3 < total_load:
-            return False
+            if inst.vehicles[vehInd].max_capacity < req.placesVehicle:
+                return False
         actvts = self.getSortedActivities(inst.vehicles[vehInd].history)
         for act1 in actvts:
             for act2 in actvts:
@@ -177,27 +175,28 @@ class Problem:
                     return False
         total_time = datetime.timedelta(0)
         for i in range(1, len(actvts)):
-            if self.distMatrix[actvts[i-1]][actvts[i]] > actvts[i].time - actvts[i-1].time:
+            print(i,self.distMatrix[actvts[i-1].place][actvts[i].place],(actvts[i].time - actvts[i-1].time))
+            if self.distMatrix[actvts[i-1].place][actvts[i].place] > (actvts[i].time - actvts[i-1].time):
                 return False
             if actvts[i].load != actvts[i].lastLoad:
-                for j in range(len(inst.requests)):
-                    if req.idReq == actvts[j].requestID:
-                        total_time += inst.requests[j].embark
-                        break
-            total_time += self.distMatrix[actvts[i-1]][actvts[i]]
+                total_time += inst.getReqbyID(actvts[i].requestID).embark
+                # for j in range(len(inst.requests)):
+                #     if req.idReq == actvts[j].requestID:
+                #         total_time += inst.requests[j].embark
+                #         break
+            total_time += self.distMatrix[actvts[i-1].place][actvts[i].place]
         if total_time > inst.vehicles[vehInd].getTimeWindow()[1] - inst.vehicles[vehInd].getTimeWindow()[0]:
             return False
-        
         d = dict()
         for i in actvts:
             if i.requestID not in d.keys():
                 d[i.requestID]=0
-                if self.reqTime(inst,vehID,i.requestId,0) > self.maxWaitTime:
+                if self.reqTime(inst,vehID,i.requestID,0) > self.maxWaitTime:
                     return False
             else:
                 d[i.requestID]+=1
             if d[i.requestID]==4:
-                if self.reqTime(inst,vehID,i.requestId,1) > self.maxWaitTime:
+                if self.reqTime(inst,vehID,i.requestID,1) > self.maxWaitTime:
                     return False
         return True
    
@@ -266,7 +265,10 @@ class Problem:
         else:
             endTime = pacient_time + self.distMatrix[req.destPlace][req.returnPlace]+req.embark
         beforeAct = veh.getLastAct(endTime)
-        endAct = Activity.Activity(req.returnPlace,endTime,req.idReq,beforeAct.load-req.placesVehicle,beforeAct.load)
+        if req.returnPlace==-1:
+            endAct = Activity.Activity(req.destPlace,endTime,req.idReq,beforeAct.load-req.placesVehicle,beforeAct.load)
+        else:
+            endAct = Activity.Activity(req.returnPlace,endTime,req.idReq,beforeAct.load-req.placesVehicle,beforeAct.load)
         inst.getVehbyID(vehID).history.append(endAct)
         return True
         
