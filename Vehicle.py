@@ -29,6 +29,10 @@ class Vehicle:
         self.history.remove(act)
 
     def __eq__(self,other):
+        if other == None:
+            return False
+        if self == None:
+            return False
         return self.id == other.id and self.canTake == other.canTake and self.start == other.start and self.end == other.end and self.max_capacity == other.max_capacity and self.availability == other.availability
 
     def getLastAct(self,time):

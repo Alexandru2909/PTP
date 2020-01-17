@@ -89,7 +89,7 @@ class Problem:
 
             # backward
             weight = 0
-            # test_instance = Instance.Instance(inst)
+            test_instance = Instance.Instance(inst)
             isInsertValid = self.insertBackward(test_instance, request.idReq, vehicle.id)
             isVehicleValid = self.checkVehicle(test_instance, vehicle.id)
             pacient_time = request.serviceBegin + request.serviceDuration + request.embark + self.distMatrix[request.destPlace][request.returnPlace]
@@ -98,15 +98,16 @@ class Problem:
             if isInsertValid and isVehicleValid:
                 weight += 10 * (vehicle.max_capacity - beforeAct.load)
                 # vehicleLastLocation = vehicle.getLastAct(request.serviceBegin + request.serviceDuration).place
-                timeToDeliver = self.reqTime(test_instance, vehicle.id, request.idReq, 1)
+                timeToDeliver = self.reqTime(test_instance, vehicle.id, request.idReq, 0)
                 weight += timeToDeliver.seconds/60
 
                 if weight > max_weight_backward:
                     max_weight_backward = weight
                     best_vehicle_backward = vehicle
                 
-
-        return (best_vehicle_forward, best_vehicle_backward)
+        if best_vehicle_backward == None or best_vehicle_forward == None:
+            return None
+        return (best_vehicle_forward.id, best_vehicle_backward.id)
 
 
 
@@ -208,18 +209,20 @@ class Problem:
    
 
     def subsearch(self,inst,initDepth,layersLeft):
+        number_reqs = 0
+        for i in inst.requests:
+            if i.selected==1:
+                number_reqs+=1
         if layersLeft==0:
-            number_reqs = 0
-            for i in inst.requests:
-                if i.selected==1:
-                    number_reqs+=1
+            h1 = self.getBestRequest(inst.requests[initDepth],number_reqs) 
             copyInst = Instance.Instance(inst)
             copyInst.requests[initDepth].selected=1
             v = self.getBestVehicle(copyInst.requests[initDepth],copyInst)
+            if v==None:
+                return -1
             self.insertForward(copyInst,copyInst.requests[initDepth].idReq,v[0])
             self.insertBackward(copyInst,copyInst.requests[initDepth].idReq,v[1])
-            h1 = self.getBestRequest(inst.requests[copyInst],number_reqs) 
-            h2 = self.getBestRequest(inst.requests[initDepth],number_reqs) 
+            h2 = self.getBestRequest(inst.requests[initDepth],number_reqs)
             return max([h1,h2])
             # compare heuristic(inst,initDepth,slected=0) and heuristic(inst,initDepth,slected=1) and return min
             # insert here heuristic returning int
@@ -230,7 +233,7 @@ class Problem:
             v = self.getBestVehicle(copyInst.requests[initDepth],copyInst)
             self.insertForward(copyInst,copyInst.requests[initDepth].idReq,v[0])
             self.insertBackward(copyInst,copyInst.requests[initDepth].idReq,v[1])
-            h1 = self.getBestRequest(inst.requests[copyInst],number_reqs) 
+            h1 = self.getBestRequest(inst.requests[initDepth],number_reqs) 
             h2 = self.getBestRequest(inst.requests[initDepth],number_reqs) 
             m2 = self.subsearch(copyInst,initDepth+1,layersLeft-1)
             return max([m1,m2])
@@ -245,12 +248,14 @@ class Problem:
             copyInst = Instance.Instance(initInst)
             copyInst.requests[i].selected=1
             v = self.getBestVehicle(copyInst.requests[i],copyInst)
-            self.insertForward(copyInst,copyInst.requests[i].reqID,v[0])
-            self.insertBackward(copyInst,copyInst.requests[i].reqID,v[1])
+            if v==None:
+                continue
+            self.insertForward(copyInst,copyInst.requests[i].idReq,v[0])
+            self.insertBackward(copyInst,copyInst.requests[i].idReq,v[1])
             h1 = self.subsearch(copyInst,i,depth)
             if h1>h2:
                 initInst.copy(copyInst)
-            
+        return initInst
 
 
 
