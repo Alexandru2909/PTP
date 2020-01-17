@@ -6,7 +6,6 @@ def convertTime(x):
     h,m=x.split('h')
     return datetime.timedelta(hours=int(h), minutes=int(m))
 
-
 class Problem:
     places = list()
     vehicles = list()
@@ -32,10 +31,9 @@ class Problem:
                 self.places.append(Place.Place(place['id'], place['lat'], place['long'], place['category']))
 
             for vehicle in data['vehicles']:
-                if len(vehicle["availability"]) > 1:
-                    for i in range(len(vehicle["availability"])):
-                        self.vehicles.append(Vehicle.Vehicle(vehicle["id"], vehicle["canTake"], vehicle["start"], vehicle["end"],
-                                                        vehicle["capacity"], vehicle["availability"][i]))
+                for i in range(len(vehicle["availability"])):
+                    self.vehicles.append(Vehicle.Vehicle(vehicle["id"], vehicle["canTake"], vehicle["start"], vehicle["end"],
+                                                    vehicle["capacity"], vehicle["availability"][i]))
                 # print( vehicle["availability"],self.vehicles[-1].availability[0])
 
             for patient in data['patients']:
@@ -44,7 +42,6 @@ class Problem:
             # for vh in self.vehicles:
             #     # for i in range(len(vh.getTimeWindow())):
             #     vh.history.append((vh.start, vh.getTimeWindow()[0]))
-  
 
     def getPlaces(self):
         return self.places
@@ -63,7 +60,6 @@ class Problem:
     def getBestRequest(self, request, no_solutions):
         def minSlack(request):
                 return (self.distMatrix[request.startPlace][request.destPlace] + self.distMatrix[request.destPlace][request.returnPlace] + 4*request.embark)*request.placesVehicle
-
         minSlack = minSlack(request)
         return minSlack.seconds/60 + no_solutions*10
     
@@ -80,7 +76,7 @@ class Problem:
             isVehicleValid = self.checkVehicle(test_instance, vehicle.id)
             if isVehicleValid:
                 weight += 10 * (vehicle.max_capacity - vehicle.capacity)
-                vehicleLastLocation = vehicle.getLastAct(request.serviceBegin).place
+                # vehicleLastLocation = vehicle.getLastAct(request.serviceBegin).place
                 timeToDeliver = self.reqTime(test_instance, vehicle.id, request.id, 0)
                 weight += timeToDeliver.seconds/60
 
@@ -91,11 +87,11 @@ class Problem:
             # backward
             weight = 0
             test_instance = Instance.Instance(inst)
-            test_instance.self.insertBackward(test_instance, request.id, vehicle.id)
+            self.insertBackward(test_instance, request.id, vehicle.id)
             isVehicleValid = self.checkVehicle(test_instance, vehicle.id)
             if isVehicleValid:
                 weight += 10 * (vehicle.max_capacity - vehicle.max_capacity)
-                vehicleLastLocation = vehicle.getLastAct(request.serviceBegin + request.serviceDuration).place
+                # vehicleLastLocation = vehicle.getLastAct(request.serviceBegin + request.serviceDuration).place
                 timeToDeliver = self.reqTime(test_instance, vehicle.id, request.id, 1)
                 weight += timeToDeliver.seconds/60
 
@@ -124,26 +120,22 @@ class Problem:
     #     else:
     #         return minId
 
-    def orderReq(self):
-        for i in range(len(self.requests)):
-            for j in range(len(self.requests)):
-                if self.requests[i].serviceBegin < self.requests[j].serviceBegin:
-                    a = self.requests[i]
-                    self.requests[i] = self.requests[j]
-                    self.requests[j] = a
-        # return self.requests
+    # def orderReq(self):
+    #     for i in range(len(self.requests)):
+    #         for j in range(len(self.requests)):
+    #             if self.requests[i].serviceBegin < self.requests[j].serviceBegin:
+    #                 a = self.requests[i]
+    #                 self.requests[i] = self.requests[j]
+    #                 self.requests[j] = a
+    #     # return self.requests
     
     def getSortedActivities(self, history):
-        ret_list = list()
-        for act in history:
-            ret_list.append(act)
-        ret_list.sort(key=lambda act: act.time)
-        return ret_list
+        return list.sort(history, key=lambda act: act.time)
 
     def reqTime(self, inst, vehID, reqID, f_b):
         found = 0
         searching = False
-        history = getSortedActivities(inst.vehicles[vehID].history) 
+        history = self.getSortedActivities(inst.vehicles[vehID].history) 
         for i in history:
             if searching == True:
                 total_time += self.distMatrix[history[i].place][history[i+1].place]
@@ -178,7 +170,7 @@ class Problem:
                     total_load += act.load
         if inst.vehicles[vehInd].canTake * 3 < total_load:
             return False
-        actvts = self.getSortedActivities(init.vehicles[vehInd].history)
+        actvts = self.getSortedActivities(inst.vehicles[vehInd].history)
         for act1 in actvts:
             for act2 in actvts:
                 if act1.time == act2.time and act1.place != act2.place:
@@ -210,26 +202,26 @@ class Problem:
         return True
    
 
-    def subsearch(self,inst,initDepth,layersLeft):
-        minH = 1000
-        if layersLeft==0:
-            pass
-            # compare heuristic(inst,initDepth,slected=0) and heuristic(inst,initDepth,slected=1) and return min
-            # insert here heuristic returning int
-        else:
-            pass
-            # m1 = heuristic(inst,initDepth,slected=0)
-            # m2 = heuristic(inst,initDepth,slected=1)
-            # if m1<m2
-            #   return m1
-            # else
-            #   return m2
+    # def subsearch(self,inst,initDepth,layersLeft):
+    #     minH = 1000
+    #     if layersLeft==0:
+    #         pass
+    #         # compare heuristic(inst,initDepth,slected=0) and heuristic(inst,initDepth,slected=1) and return min
+    #         # insert here heuristic returning int
+    #     else:
+    #         pass
+    #         # m1 = heuristic(inst,initDepth,slected=0)
+    #         # m2 = heuristic(inst,initDepth,slected=1)
+    #         # if m1<m2
+    #         #   return m1
+    #         # else
+    #         #   return m2
 
-    def search(self,depth):
-        self.getRequests()
-        self.orderReq()
-        initInst = Instance.Instance(self)
-        # to be completed using subsearch
+    # def search(self,depth):
+    #     self.getRequests()
+    #     self.orderReq()
+    #     initInst = Instance.Instance(self)
+    #     # to be completed using subsearch
 
     # TODO Alex
     def insertForward(self, inst, reqID, vehID):
@@ -237,10 +229,10 @@ class Problem:
         req = inst.getReqbyID(reqID)
         pacient_time = req.serviceBegin - (req.embark + self.distMatrix[req.startPlace][req.destPlace])
         # starting_time = req.serviceBegin - (self.distMatrix[veh.getLastAct().place][req.startPlace] + self.distMatrix[req.embark]*2 + self.distMatrix[req.startPlace][req.destPlace])
-        beforeAct = veh.getLastAct(pacient_time)
-        starting_time = pacient_time-self.distMatrix[beforeAct.place][req.startPlace]-req.embark
+        beforeAct1 = veh.getLastAct(pacient_time)
+        starting_time = pacient_time-self.distMatrix[beforeAct1.place][req.startPlace]-req.embark
         beforeAct = veh.getLastAct(starting_time)
-        if beforeAct != veh.getLastAct(pacient_time):
+        if beforeAct1 != beforeAct:
             return False
         # startTime = inst.request[reqID].serviceBegin - (self.distMatrix[veh.getLastAct().place][inst.requests[reqID].startPlace] + self.distMatrix[inst.request[reqID].embark]*2 + self.distMatrix[inst.request[reqID].startPlace][inst.request[reqID].destPlace])
         startAct = Activity.Activity(beforeAct.place,starting_time,req.idReq,beforeAct.load,beforeAct.load)
@@ -248,6 +240,9 @@ class Problem:
         midAct = Activity.Activity(req.startPlace,pacient_time,req.idReq,vehicleLoad,beforeAct.load)
         beforeAct = veh.getLastAct(req.serviceBegin)
         endAct = Activity.Activity(req.destPlace,req.serviceBegin,req.idReq,beforeAct.load,vehicleLoad)        
+        inst.getVehbyID(vehID).history.append(startAct)
+        inst.getVehbyID(vehID).history.append(midAct)
+        inst.getVehbyID(vehID).history.append(endAct)
         return True
 
     def insertBackward(self, inst, reqID, vehID):
@@ -256,24 +251,23 @@ class Problem:
         pacient_time = req.serviceBegin + req.serviceDuration + req.embark
         # starting_time = req.serviceBegin - (self.distMatrix[veh.getLastAct().place][req.startPlace] + self.distMatrix[req.embark]*2 + self.distMatrix[req.startPlace][req.destPlace])
         beforeAct = veh.getLastAct(pacient_time)
-        starting_time = pacient_time-self.distMatrix[beforeAct.place][req.startPlace]-req.embark
+        starting_time = pacient_time-self.distMatrix[beforeAct.place][req.destPlace]-req.embark
         beforeAct = veh.getLastAct(starting_time)
         if beforeAct != veh.getLastAct(pacient_time):
             return False
         # startTime = inst.request[reqID].serviceBegin - (self.distMatrix[veh.getLastAct().place][inst.requests[reqID].startPlace] + self.distMatrix[inst.request[reqID].embark]*2 + self.distMatrix[inst.request[reqID].startPlace][inst.request[reqID].destPlace])
         startAct = Activity.Activity(beforeAct.place,starting_time,req.idReq,beforeAct.load,beforeAct.load)
         vehicleLoad = beforeAct.load+req.placesVehicle
+        inst.getVehbyID(vehID).history.append(startAct)
         midAct = Activity.Activity(req.destPlace,pacient_time,req.idReq,vehicleLoad,beforeAct.load)
-        endTime = pacient_time + self.distMatrix[req.destPlace][req.returnPlace]+req.embark
+        inst.getVehbyID(vehID).history.append(midAct)
+        if req.returnPlace==-1:
+            endTime = pacient_time + self.distMatrix[req.destPlace][req.destPlace]+req.embark
+        else:
+            endTime = pacient_time + self.distMatrix[req.destPlace][req.returnPlace]+req.embark
         beforeAct = veh.getLastAct(endTime)
         endAct = Activity.Activity(req.returnPlace,endTime,req.idReq,beforeAct.load-req.placesVehicle,beforeAct.load)
+        inst.getVehbyID(vehID).history.append(endAct)
         return True
         
 
-# for testing
-# x = Problem('Models/easy/PTP-RAND-1_8_4_32.json')
-# x.getRequests()
-# y = Instance.Instance(x)
-# for i in x.requests:
-    # print(i.startPlace,i.destPlace,i.placesVehicle,'id=',i.idReq,i.embark)
-# print(x.getBestVeh(y,0))

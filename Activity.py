@@ -5,6 +5,10 @@ class Activity:
         self.requestID = requestID
         self.load = load
         self.lastLoad = last_load
+    def __eq__(self,other):
+        if self.place==other.place and self.time == other.time and self.requestID == other.requestID and self.load==other.load and self.lastLoad == other.lastLoad:
+            return True
+        return False
 # import datetime
 # class Activity:
 #     def __init__(self,startPlace,startTime,midPlace,midTime,endPlace,endTime,timeleft,requestInd,load):
